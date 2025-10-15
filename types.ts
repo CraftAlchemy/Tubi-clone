@@ -16,3 +16,12 @@ export interface User {
   password?: string; // Password should not be passed around
   role: 'user' | 'admin';
 }
+
+// FIX: Add global declaration for ion-icon to fix TypeScript errors.
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            "ion-icon": any;
+        }
+    }
+}
