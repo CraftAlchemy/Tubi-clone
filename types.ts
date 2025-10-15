@@ -1,4 +1,3 @@
-
 export interface Movie {
   id: number;
   title: string;
@@ -7,6 +6,13 @@ export interface Movie {
 }
 
 export interface Category {
-  title: string;
+  title:string;
   movies: Movie[];
+}
+
+export interface User {
+  id: number;
+  email: string;
+  password?: string; // Password should not be passed around
+  role: 'user' | 'admin';
 }

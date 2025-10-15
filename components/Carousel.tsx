@@ -6,9 +6,10 @@ import type { Movie } from '../types';
 interface CarouselProps {
   title: string;
   movies: Movie[];
+  onMovieClick: (movie: Movie) => void;
 }
 
-const Carousel: React.FC<CarouselProps> = ({ title, movies }) => {
+const Carousel: React.FC<CarouselProps> = ({ title, movies, onMovieClick }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -34,7 +35,7 @@ const Carousel: React.FC<CarouselProps> = ({ title, movies }) => {
         className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide"
       >
         {movies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} />
+          <MovieCard key={movie.id} movie={movie} onClick={onMovieClick} />
         ))}
       </div>
       <button

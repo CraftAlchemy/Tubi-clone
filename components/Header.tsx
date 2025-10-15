@@ -1,8 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
+import type { User } from '../types';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+    currentUser: User | null;
+    onLogout: () => void;
+    onSearch: (query: string) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch }) => {
     const [isScrolled, setIsScrolled] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const handleScroll = () => {
@@ -20,11 +27,17 @@ const Header: React.FC = () => {
         };
     }, []);
 
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const query = event.target.value;
+        setSearchQuery(query);
+        onSearch(query);
+    }
+
     return (
         <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-tubi-black bg-opacity-95' : 'bg-transparent'}`}>
             <div className="flex items-center justify-between px-4 md:px-10 lg:px-16 py-4">
                 <div className="flex items-center space-x-8">
-                    <TubiLogo />
+                     <a href="/#/"><TubiLogo /></a>
                     <nav className="hidden md:flex items-center space-x-6 text-sm font-semibold">
                         <a href="#" className="text-white hover:text-tubi-light-gray transition-colors">Browse</a>
                         <a href="#" className="text-white hover:text-tubi-light-gray transition-colors">Live TV</a>
@@ -32,15 +45,38 @@ const Header: React.FC = () => {
                     </nav>
                 </div>
                 <div className="flex items-center space-x-4">
-                    <button className="p-2 rounded-full hover:bg-tubi-gray transition-colors">
-                        <SearchIcon />
-                    </button>
-                    <button className="hidden md:block text-sm font-semibold border border-white px-4 py-1.5 rounded-full hover:bg-white hover:text-black transition-colors">
-                        Sign In
-                    </button>
-                    <button className="text-sm font-semibold bg-white text-black px-4 py-1.5 rounded-full hover:opacity-80 transition-opacity">
-                        Register
-                    </button>
+                     <div className="relative hidden md:block">
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            className="bg-tubi-gray border-2 border-transparent focus:border-tubi-light-gray focus:ring-0 rounded-full pl-4 pr-10 py-1.5 w-40 md:w-64 text-sm text-white transition-width duration-300"
+                        />
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <SearchIcon />
+                        </div>
+                    </div>
+                    {currentUser ? (
+                         <>
+                            <a href="#/profile" className="hidden md:flex items-center text-sm font-semibold border border-white px-4 py-1.5 rounded-full hover:bg-white hover:text-black transition-colors">
+                                <UserIcon />
+                                <span className="ml-2">Profile</span>
+                            </a>
+                            <button onClick={onLogout} className="text-sm font-semibold bg-white text-black px-4 py-1.5 rounded-full hover:opacity-80 transition-opacity">
+                                Sign Out
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <a href="#/login" className="hidden md:block text-sm font-semibold border border-white px-4 py-1.5 rounded-full hover:bg-white hover:text-black transition-colors">
+                                Sign In
+                            </a>
+                            <a href="#/register" className="text-sm font-semibold bg-white text-black px-4 py-1.5 rounded-full hover:opacity-80 transition-opacity">
+                                Register
+                            </a>
+                        </>
+                    )}
                 </div>
             </div>
         </header>
@@ -58,7 +94,7 @@ const TubiLogo = () => (
 const SearchIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 text-white"
+        className="h-5 w-5 text-tubi-light-gray"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -69,6 +105,16 @@ const SearchIcon = () => (
             strokeWidth={2}
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
         />
+    </svg>
+);
+
+const UserIcon = () => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className="h-5 w-5" 
+        viewBox="0 0 20 20" 
+        fill="currentColor">
+        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
     </svg>
 );
 

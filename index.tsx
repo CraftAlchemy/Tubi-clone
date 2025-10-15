@@ -1,7 +1,15 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+
+// FIX: Add global declaration for ion-icon to fix TypeScript errors.
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            "ion-icon": any;
+        }
+    }
+}
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

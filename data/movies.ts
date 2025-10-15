@@ -1,4 +1,3 @@
-
 import type { Movie, Category } from '../types';
 
 export const HERO_MOVIE: Movie = {
@@ -13,6 +12,7 @@ const generateMovies = (count: number, seed: number): Movie[] => {
     id: seed * 100 + i,
     title: `Awesome Movie Title ${seed * 100 + i}`,
     posterUrl: `https://picsum.photos/400/600?random=${seed * 100 + i}`,
+    description: `This is a compelling description for Awesome Movie Title ${seed * 100 + i}. It involves action, drama, and a touch of romance that will keep you hooked until the very end.`
   }));
 };
 
@@ -42,3 +42,26 @@ export const CATEGORIES: Category[] = [
     movies: generateMovies(10, 6),
   },
 ];
+
+const NEW_CATEGORY_TITLES = [
+    'Critically Acclaimed',
+    'Indie Gems',
+    'Documentaries',
+    'Family Movie Night',
+    'Thrillers',
+    'Based on a True Story'
+];
+
+export const generateMoreCategories = (page: number): Category[] => {
+    // Generate 3 new categories per "page"
+    return Array.from({ length: 3 }, (_, i) => {
+        const categoryIndex = (page - 1) * 3 + i;
+        const title = `${NEW_CATEGORY_TITLES[categoryIndex % NEW_CATEGORY_TITLES.length]} #${page}`;
+        // The seed needs to be unique to avoid generating the same movies
+        const seed = 10 + page * 10 + i; 
+        return {
+            title: title,
+            movies: generateMovies(10, seed),
+        };
+    });
+};

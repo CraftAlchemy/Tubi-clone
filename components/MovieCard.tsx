@@ -4,11 +4,15 @@ import type { Movie } from '../types';
 
 interface MovieCardProps {
   movie: Movie;
+  onClick: (movie: Movie) => void;
 }
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
+const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick }) => {
   return (
-    <div className="group flex-shrink-0 w-40 md:w-52 lg:w-60 cursor-pointer">
+    <div 
+      className="group flex-shrink-0 w-40 md:w-52 lg:w-60 cursor-pointer"
+      onClick={() => onClick(movie)}
+    >
       <div className="relative overflow-hidden rounded-lg aspect-[2/3] bg-tubi-gray">
         <img
           src={movie.posterUrl}
