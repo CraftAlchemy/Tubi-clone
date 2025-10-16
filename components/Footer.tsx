@@ -1,6 +1,4 @@
 
-
-
 // FIX: Moved side-effect import to the top to ensure global type augmentations are loaded first.
 import '../types';
 import React from 'react';

@@ -1,40 +1,32 @@
-// This allows using <ion-icon> in JSX without TypeScript errors.
-// This is a global augmentation.
-// FIX: Updated the type definition for 'ion-icon' to be more specific, resolving errors.
-declare global {
-  namespace JSX {
+
+// Add type augmentation for ion-icon
+declare namespace JSX {
     interface IntrinsicElements {
-      'ion-icon': {
-        name: string;
-        style?: { [key: string]: string | number };
-        // Allow any other attributes for web components
-        [key: string]: any;
-      };
+        'ion-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { name: string; style?: React.CSSProperties }, HTMLElement>;
     }
-  }
 }
 
 export interface User {
-  id: number;
-  email: string;
-  password?: string; // Should not be passed to client, but exists in data
-  role: 'user' | 'admin';
-  tokens: number;
+    id: number;
+    email: string;
+    password?: string; // Should not be sent to client
+    role: 'user' | 'admin';
+    tokens: number;
 }
 
 export interface Movie {
-  id: number;
-  title: string;
-  description: string;
-  posterUrl: string;
-  videoUrl: string;
-  trailerUrl: string;
-  tokenCost?: number;
+    id: number;
+    title: string;
+    posterUrl: string;
+    description: string;
+    videoUrl?: string;
+    trailerUrl?: string;
+    tokenCost?: number;
 }
 
 export interface Category {
-  title:string;
-  movies: Movie[];
+    title: string;
+    movies: Movie[];
 }
 
 export interface Episode {
@@ -79,7 +71,7 @@ export interface Advertisement {
     id: number;
     title: string;
     videoUrl: string;
-    duration: number;
+    duration: number; // in seconds
     tokenReward: number;
 }
 
