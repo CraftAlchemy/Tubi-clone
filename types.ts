@@ -1,33 +1,21 @@
-// FIX: Define global types for ion-icon web component to inform TypeScript about the custom element.
+
+// For ion-icon custom elements
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'ion-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { name: string; class?: string; style?: React.CSSProperties }, HTMLElement>;
+      'ion-icon': any;
     }
   }
-}
-
-export interface User {
-  id: number;
-  email: string;
-  password?: string;
-  role: 'admin' | 'user';
-  tokens: number;
 }
 
 export interface Movie {
   id: number;
   title: string;
   posterUrl: string;
-  description: string;
-  videoUrl?: string;
+  description?: string;
   trailerUrl?: string;
+  videoUrl?: string;
   tokenCost?: number;
-}
-
-export interface Category {
-  title: string;
-  movies: Movie[];
 }
 
 export interface Episode {
@@ -35,8 +23,8 @@ export interface Episode {
   title: string;
   posterUrl: string;
   description: string;
-  videoUrl?: string;
   duration: string;
+  videoUrl: string;
   tokenCost?: number;
 }
 
@@ -56,46 +44,56 @@ export interface Series {
   tokenCost?: number;
 }
 
+export interface Category {
+  title: string;
+  movies: Movie[];
+}
+
 export interface SeriesCategory {
   title: string;
   series: Series[];
 }
 
-export interface LiveTVChannel {
+export interface User {
   id: number;
-  name: string;
-  logoUrl: string;
-  streamUrl: string;
+  email: string;
+  password?: string; // Should not be exposed to client in a real app
+  role: 'user' | 'admin';
+  tokens: number;
+}
+
+export interface LiveTVChannel {
+    id: number;
+    name: string;
+    logoUrl: string;
+    streamUrl: string;
 }
 
 export interface Advertisement {
-  id: number;
-  title: string;
-  videoUrl: string;
-  duration: number;
-  tokenReward: number;
+    id: number;
+    title: string;
+    videoUrl: string;
+    duration: number; // in seconds
+    tokenReward: number;
 }
 
 export interface TokenPack {
-  id: number;
-  amount: number;
-  price: number;
-  isBestValue: boolean;
-}
-
-export interface BannerAd {
     id: number;
-    imageUrl: string;
-    linkUrl: string;
-    placement: string;
+    amount: number;
+    price: number;
+    isBestValue: boolean;
 }
 
 export interface InStreamAd {
     id: number;
     videoUrl: string;
     duration: number;
-    placement: string;
+    placement: 'pre-roll' | 'mid-roll' | 'post-roll';
 }
 
-// This empty export is a trick to ensure this file is treated as a module by TypeScript.
-export {};
+export interface BannerAd {
+    id: number;
+    imageUrl: string;
+    linkUrl: string;
+    placement: 'home-top' | 'sidebar';
+}

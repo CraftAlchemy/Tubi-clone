@@ -1,4 +1,4 @@
-// FIX: Import types for ion-icon custom element.
+// FIX: Property 'ion-icon' does not exist on type 'JSX.IntrinsicElements'. Importing 'types' makes the global definition for 'ion-icon' available.
 import '../../types';
 import React, { useState } from 'react';
 
