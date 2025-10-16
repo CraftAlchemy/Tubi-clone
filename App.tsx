@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -21,6 +22,7 @@ import type { User, Category, Movie, SeriesCategory, Series, Episode } from './t
 
 const App: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [users, setUsers] = useState<User[]>(USERS);
     const [categories, setCategories] = useState<Category[]>(CATEGORIES);
     const [seriesCategories, setSeriesCategories] = useState<SeriesCategory[]>(SERIES_CATEGORIES);
     const [route, setRoute] = useState(window.location.hash);
@@ -56,7 +58,7 @@ const App: React.FC = () => {
     }, []);
 
     const handleLogin = (email: string, password: string): boolean => {
-        const user = USERS.find(u => u.email === email && u.password === password);
+        const user = users.find(u => u.email === email && u.password === password);
         if (user) {
             // Fix: Use object destructuring to safely remove password and maintain type correctness.
             const { password: _password, ...userToStore } = user;
@@ -82,16 +84,17 @@ const App: React.FC = () => {
     };
 
     const handleRegister = (email: string, password: string): boolean => {
-        if (USERS.some(u => u.email === email)) {
+        if (users.some(u => u.email === email)) {
             return false;
         }
         const newUser: User = {
-            id: USERS.length + 1,
+            id: (users.length > 0 ? Math.max(...users.map(u => u.id)) : 0) + 1,
             email,
             password,
             role: 'user',
         };
-        USERS.push(newUser);
+        const updatedUsers = [...users, newUser];
+        setUsers(updatedUsers);
         handleLogin(email, password);
         return true;
     };
@@ -102,6 +105,10 @@ const App: React.FC = () => {
     
     const handleSeriesContentUpdate = (updatedSeriesCategories: SeriesCategory[]) => {
         setSeriesCategories(updatedSeriesCategories);
+    };
+
+    const handleUsersUpdate = (updatedUsers: User[]) => {
+        setUsers(updatedUsers);
     };
 
     const handleMovieClick = (movie: Movie) => {
@@ -198,7 +205,7 @@ const App: React.FC = () => {
             case '#/profile':
                 return currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} categories={categories} myList={myList} onMovieClick={handleMovieClick} onToggleMyList={handleToggleMyList} /> : <LoginPage onLogin={handleLogin} />;
             case '#/admin':
-                return currentUser?.role === 'admin' ? <AdminDashboard categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} /> : <div className="pt-24 text-center">Access Denied</div>;
+                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} /> : <div className="pt-24 text-center">Access Denied</div>;
             case '#/series':
                 return <SeriesPage seriesCategories={seriesCategories} onSeriesClick={handleSeriesClick} isLoading={isInitialLoading} />;
             default:

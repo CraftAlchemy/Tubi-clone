@@ -12,5 +12,23 @@ export const USERS: User[] = [
         email: 'user@tubi.com',
         password: 'password',
         role: 'user',
+    },
+    {
+        id: 3,
+        email: 'jane.doe@example.com',
+        password: 'password123',
+        role: 'user',
+    },
+    {
+        id: 4,
+        email: 'john.smith@example.com',
+        password: 'password123',
+        role: 'user',
+    },
+    {
+        id: 5,
+        email: 'editor@tubi.com',
+        password: 'password',
+        role: 'admin',
     }
 ];

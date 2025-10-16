@@ -1,5 +1,6 @@
-// Fix: Changed to a full React import to ensure JSX namespace is correctly augmented.
-import * as React from 'react';
+
+// Fix: Changed to a type-only React import to ensure JSX namespace is correctly augmented without conflicts.
+import type * as React from 'react';
 
 // The `declare global` block augments React's JSX types to include the custom `ion-icon` element.
 // This file is treated as a module because it contains exports, which ensures
