@@ -8,7 +8,7 @@ import RegisterPage from './components/RegisterPage';
 import ProfilePage from './components/ProfilePage';
 import MovieDetail from './components/MovieDetail';
 import AdminDashboard from './components/admin/AdminDashboard';
-import { HERO_MOVIE, CATEGORIES, generateMoreCategories } from './data/movies';
+import { HERO_MOVIE, generateMoreCategories, CATEGORIES } from './data/movies';
 import { USERS } from './data/users';
 import type { User, Category, Movie } from './types';
 
@@ -20,6 +20,7 @@ const App: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [myList, setMyList] = useState<number[]>([]);
 
     useEffect(() => {
         const handleHashChange = () => {
@@ -35,6 +36,15 @@ const App: React.FC = () => {
             const userToStore = { ...user };
             delete userToStore.password;
             setCurrentUser(userToStore);
+            
+            // Load My List from localStorage
+            const storedList = localStorage.getItem(`my-list-${user.id}`);
+            if (storedList) {
+                setMyList(JSON.parse(storedList));
+            } else {
+                setMyList([]);
+            }
+
             window.location.hash = user.role === 'admin' ? '/admin' : '/';
             return true;
         }
@@ -43,6 +53,7 @@ const App: React.FC = () => {
 
     const handleLogout = () => {
         setCurrentUser(null);
+        setMyList([]);
         window.location.hash = '/';
     };
 
@@ -77,6 +88,22 @@ const App: React.FC = () => {
         setSearchQuery(query);
     };
 
+    const handleToggleMyList = (movieId: number) => {
+        if (!currentUser) return;
+
+        const isMovieInList = myList.includes(movieId);
+        let updatedList: number[];
+
+        if (isMovieInList) {
+            updatedList = myList.filter(id => id !== movieId);
+        } else {
+            updatedList = [...myList, movieId];
+        }
+
+        setMyList(updatedList);
+        localStorage.setItem(`my-list-${currentUser.id}`, JSON.stringify(updatedList));
+    };
+
     const loadMoreCategories = useCallback(() => {
         if (isLoading) return;
         setIsLoading(true);
@@ -100,13 +127,27 @@ const App: React.FC = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [isLoading, loadMoreCategories]);
 
+    const allMovies = categories.flatMap(cat => cat.movies).concat(HERO_MOVIE);
+    const uniqueMovies = Array.from(new Map(allMovies.map(m => [m.id, m])).values());
+    
+    const myListMovies = myList
+        .map(id => uniqueMovies.find(movie => movie.id === id))
+        .filter((movie): movie is Movie => movie !== undefined);
 
-    const filteredCategories = searchQuery 
+    let categoriesToShow = searchQuery 
         ? categories.map(category => ({
             ...category,
             movies: category.movies.filter(movie => movie.title.toLowerCase().includes(searchQuery.toLowerCase()))
           })).filter(category => category.movies.length > 0)
-        : categories;
+        : [...categories];
+
+    if (currentUser && myListMovies.length > 0 && !searchQuery) {
+        const myListCategory: Category = {
+            title: 'My List',
+            movies: myListMovies
+        };
+        categoriesToShow.unshift(myListCategory);
+    }
 
     const renderPage = () => {
         switch (route) {
@@ -115,20 +156,23 @@ const App: React.FC = () => {
             case '#/register':
                 return <RegisterPage onRegister={handleRegister} />;
             case '#/profile':
-                return currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} /> : <LoginPage onLogin={handleLogin} />;
+                return currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} categories={categories} myList={myList} onMovieClick={handleMovieClick} onToggleMyList={handleToggleMyList} /> : <LoginPage onLogin={handleLogin} />;
             case '#/admin':
                 return currentUser?.role === 'admin' ? <AdminDashboard categories={categories} onContentUpdate={handleContentUpdate} /> : <div className="pt-24 text-center">Access Denied</div>;
             default:
                 return (
                     <>
-                        <Hero movie={HERO_MOVIE} />
+                        <Hero movie={HERO_MOVIE} myList={myList} onToggleMyList={handleToggleMyList} currentUser={currentUser} />
                         <div className="px-4 md:px-10 lg:px-16 py-8 space-y-12">
-                            {filteredCategories.map((category) => (
+                            {categoriesToShow.map((category) => (
                                 <Carousel 
                                     key={category.title} 
                                     title={category.title} 
                                     movies={category.movies}
                                     onMovieClick={handleMovieClick}
+                                    myList={myList}
+                                    onToggleMyList={handleToggleMyList}
+                                    currentUser={currentUser}
                                 />
                             ))}
                             {isLoading && <p className="text-center text-white">Loading more...</p>}
@@ -144,7 +188,7 @@ const App: React.FC = () => {
             <main>
                 {renderPage()}
             </main>
-            {selectedMovie && <MovieDetail movie={selectedMovie} onClose={handleCloseDetail} />}
+            {selectedMovie && <MovieDetail movie={selectedMovie} onClose={handleCloseDetail} myList={myList} onToggleMyList={handleToggleMyList} />}
         </div>
     );
 };

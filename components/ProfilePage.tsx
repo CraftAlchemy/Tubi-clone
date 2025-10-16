@@ -1,12 +1,24 @@
+
 import React from 'react';
-import type { User } from '../types';
+import type { User, Category, Movie } from '../types';
+import MovieCard from './MovieCard';
 
 interface ProfilePageProps {
     user: User;
     onLogout: () => void;
+    categories: Category[];
+    myList: number[];
+    onMovieClick: (movie: Movie) => void;
+    onToggleMyList: (movieId: number) => void;
 }
 
-const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout }) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, categories, myList, onMovieClick, onToggleMyList }) => {
+    
+    const allMovies = categories.flatMap(cat => cat.movies);
+    const listMovies = myList
+        .map(id => allMovies.find(m => m.id === id))
+        .filter((movie): movie is Movie => movie !== undefined);
+
     return (
         <div className="min-h-screen pt-24 px-4 md:px-10 lg:px-16">
             <div className="max-w-4xl mx-auto">
@@ -36,6 +48,26 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout }) => {
                             <p className="text-white">January 2024</p>
                         </div>
                     </div>
+                </div>
+
+                <div className="bg-tubi-gray p-6 rounded-lg mt-8">
+                    <h2 className="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">My List</h2>
+                    {listMovies.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {listMovies.map(movie => (
+                            <MovieCard
+                            key={movie.id}
+                            movie={movie}
+                            onClick={onMovieClick}
+                            myList={myList}
+                            onToggleMyList={onToggleMyList}
+                            currentUser={user}
+                            />
+                        ))}
+                        </div>
+                    ) : (
+                        <p className="text-tubi-light-gray">You haven't added any movies to your list yet.</p>
+                    )}
                 </div>
 
                  <div className="mt-8">

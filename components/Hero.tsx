@@ -1,12 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import type { Movie } from '../types';
+import type { Movie, User } from '../types';
 
 interface HeroProps {
   movie: Movie;
+  myList: number[];
+  onToggleMyList: (movieId: number) => void;
+  currentUser: User | null;
 }
 
-const Hero: React.FC<HeroProps> = ({ movie }) => {
+const Hero: React.FC<HeroProps> = ({ movie, myList, onToggleMyList, currentUser }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -16,6 +19,8 @@ const Hero: React.FC<HeroProps> = ({ movie }) => {
     }, 100); 
     return () => clearTimeout(timer);
   }, []);
+
+  const isInMyList = myList.includes(movie.id);
 
   return (
     <div className="relative h-[60vh] md:h-[85vh] w-full">
@@ -40,10 +45,15 @@ const Hero: React.FC<HeroProps> = ({ movie }) => {
               <PlayIcon />
               <span className="ml-2">Play</span>
             </button>
-            <button className="flex items-center justify-center bg-gray-500 bg-opacity-50 text-white font-bold px-6 py-3 rounded-full text-lg hover:bg-opacity-70 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm">
-              <PlusIcon />
-              <span className="ml-2">Add to List</span>
-            </button>
+            {currentUser && (
+              <button 
+                onClick={() => onToggleMyList(movie.id)}
+                className="flex items-center justify-center bg-gray-500 bg-opacity-50 text-white font-bold px-6 py-3 rounded-full text-lg hover:bg-opacity-70 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+              >
+                {isInMyList ? <CheckIcon /> : <PlusIcon />}
+                <span className="ml-2">{isInMyList ? 'In My List' : 'Add to List'}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -76,6 +86,19 @@ const PlusIcon = () => (
         strokeWidth={2}
     >
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+);
+
+const CheckIcon = () => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className="h-7 w-7" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor" 
+        strokeWidth={2}
+    >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
     </svg>
 );
 
