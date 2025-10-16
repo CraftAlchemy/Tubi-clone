@@ -1,7 +1,4 @@
 
-
-
-
 import React from 'react';
 // FIX: Add side-effect import to load global JSX augmentations for ion-icon.
 import '../types';
@@ -38,8 +35,11 @@ const Footer: React.FC<FooterProps> = ({ siteName }) => {
                      <div className="space-y-3">
                         <h3 className="font-bold text-white">Social</h3>
                         <div className="flex space-x-4">
+                            {/* @ts-ignore */}
                             <a href="#" aria-label="Facebook" className="hover:text-white text-2xl"><ion-icon name="logo-facebook"></ion-icon></a>
+                            {/* @ts-ignore */}
                             <a href="#" aria-label="Twitter" className="hover:text-white text-2xl"><ion-icon name="logo-twitter"></ion-icon></a>
+                            {/* @ts-ignore */}
                             <a href="#" aria-label="Instagram" className="hover:text-white text-2xl"><ion-icon name="logo-instagram"></ion-icon></a>
                         </div>
                     </div>

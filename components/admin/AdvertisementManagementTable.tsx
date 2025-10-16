@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 // FIX: Add side-effect import to load global JSX augmentations for ion-icon.
 import '../../types';
@@ -124,7 +125,9 @@ const AdvertisementManagementTable: React.FC<AdvertisementManagementTableProps> 
                             <td className="block md:table-cell p-3 md:py-3 md:px-4 text-right md:text-left">
                                 <span className="md:hidden font-semibold float-left">Actions</span>
                                 <div className="flex justify-end md:justify-start items-center gap-4">
+                                     {/* @ts-ignore */}
                                     <button onClick={() => openEditModal(ad)} className="text-yellow-400 hover:text-yellow-300" title="Edit advertisement"><ion-icon name="pencil-outline"></ion-icon></button>
+                                     {/* @ts-ignore */}
                                     <button onClick={() => setDeleteConfirm(ad)} className="text-red-400 hover:text-red-300" title="Delete advertisement"><ion-icon name="trash-outline"></ion-icon></button>
                                 </div>
                             </td>

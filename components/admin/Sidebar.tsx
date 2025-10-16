@@ -1,6 +1,7 @@
 
 
 
+
 import React from 'react';
 // FIX: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
 import '../../types';
@@ -58,6 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ view, setView, isOpen, setIsOpen, sit
                 <div className="h-16 flex items-center justify-between px-4 border-b border-gray-700">
                      <a href="#/admin" className="text-xl font-bold text-white">{siteName} Admin</a>
                      <button onClick={() => setIsOpen(false)} className="lg:hidden text-gray-400 hover:text-white" aria-label="Close sidebar">
+                         {/* @ts-ignore */}
                          <ion-icon name="close-outline" style={{ fontSize: '28px' }}></ion-icon>
                      </button>
                 </div>
@@ -81,6 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ view, setView, isOpen, setIsOpen, sit
 
 const Icon: React.FC<{ name: string }> = ({ name }) => (
     <span className="text-2xl">
+        {/* @ts-ignore */}
         <ion-icon name={name}></ion-icon>
     </span>
 );

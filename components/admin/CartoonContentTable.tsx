@@ -1,17 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-// FIX: Use a side-effect import for global JSX definitions and `import type` for type-only imports.
-import '../../types';
+import '../../types'; // For ion-icon types
 import type { Category, Movie } from '../../types';
 
-interface ContentTableProps {
+interface CartoonContentTableProps {
     categories: Category[];
     onContentUpdate: (categories: Category[]) => void;
 }
 
 const MOVIES_PER_PAGE = 6;
 
-const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate }) => {
+const CartoonContentTable: React.FC<CartoonContentTableProps> = ({ categories, onContentUpdate }) => {
     const [editingState, setEditingState] = useState<{ originalTitle: string; newTitle: string; } | null>(null);
     const [newCategoryTitle, setNewCategoryTitle] = useState('');
     const [newMovie, setNewMovie] = useState<{ categoryTitle: string; title: string; posterUrl: string; videoUrl: string; trailerUrl: string; tokenCost: string; } | null>(null);
@@ -415,4 +414,4 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
     );
 };
 
-export default ContentTable;
+export default CartoonContentTable;

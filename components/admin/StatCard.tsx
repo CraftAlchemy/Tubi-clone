@@ -1,7 +1,4 @@
 
-
-
-
 import React from 'react';
 // FIX: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
 import '../../types';
@@ -20,6 +17,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, iconName }) => {
                 <p className="text-3xl font-bold text-white">{value}</p>
             </div>
             <div className="text-admin-accent text-4xl">
+                {/* @ts-ignore */}
                 <ion-icon name={iconName}></ion-icon>
             </div>
         </div>
