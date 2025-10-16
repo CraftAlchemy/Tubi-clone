@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -64,7 +65,8 @@ const App: React.FC = () => {
             
             const storedList = localStorage.getItem(`my-list-${user.id}`);
             if (storedList) {
-                setMyList(JSON.parse(storedList));
+                // Fix: `JSON.parse` returns `any`. Explicitly cast to `number[]` to ensure type safety.
+                setMyList(JSON.parse(storedList) as number[]);
             } else {
                 setMyList([]);
             }
@@ -245,7 +247,7 @@ const App: React.FC = () => {
 
     return (
         <div className="bg-tubi-black text-white min-h-screen font-sans">
-            <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} />
+            <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} route={route} />
             <main>
                 <ErrorBoundary>
                     {renderPage()}

@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 // The `declare global` block augments React's JSX types to include the custom `ion-icon` element.
@@ -64,8 +65,8 @@ export interface LiveTVChannel {
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            // Fix: Use React.HTMLAttributes to correctly reference React's types.
-            'ion-icon': React.HTMLAttributes<HTMLElement> & { name?: string; };
+            // Fix: Use React.DetailedHTMLProps for custom elements to ensure proper merging with existing JSX types.
+            'ion-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & { name?: string; };
         }
     }
 }

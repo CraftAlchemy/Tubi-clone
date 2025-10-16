@@ -5,9 +5,10 @@ interface HeaderProps {
     currentUser: User | null;
     onLogout: () => void;
     onSearch: (query: string) => void;
+    route: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch }) => {
+const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route }) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -31,18 +32,32 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch }) => {
         const query = event.target.value;
         setSearchQuery(query);
         onSearch(query);
-    }
+    };
+
+    const NavLink: React.FC<{ href: string; label: string; ariaLabel: string }> = ({ href, label, ariaLabel }) => {
+        // The default route is '/', represented by an empty hash or just '#/'
+        const isBrowseActive = (href === "/#/" && (route === '' || route === '#/'));
+        const isActive = isBrowseActive || route === href;
+
+        const activeClasses = 'bg-tubi-gray text-white';
+        const inactiveClasses = 'text-gray-300 hover:bg-tubi-gray hover:text-white';
+        return (
+            <a href={href} className={`px-3 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${isActive ? activeClasses : inactiveClasses}`} aria-label={ariaLabel}>
+                {label}
+            </a>
+        );
+    };
 
     return (
         <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-tubi-black bg-opacity-95' : 'bg-transparent'}`}>
             <div className="flex items-center justify-between px-4 md:px-10 lg:px-16 py-4">
                 <div className="flex items-center space-x-8">
                      <a href="/#/" title="Go to homepage" aria-label="Tubi TV Homepage"><TubiLogo /></a>
-                    <nav className="hidden md:flex items-center space-x-6 text-sm font-semibold">
-                        <a href="/#/" className="text-white hover:text-tubi-light-gray transition-colors" aria-label="Browse all movies and TV shows">Browse</a>
-                        <a href="#/series" className="text-white hover:text-tubi-light-gray transition-colors" aria-label="Browse TV series">Series</a>
-                        <a href="#/livetv" className="text-white hover:text-tubi-light-gray transition-colors" aria-label="Watch live TV channels">Live TV</a>
-                        <a href="#" className="text-white hover:text-tubi-light-gray transition-colors" aria-label="Browse content safe for kids">Tubi Kids</a>
+                    <nav className="hidden md:flex items-center space-x-2">
+                       <NavLink href="/#/" label="Browse" ariaLabel="Browse all movies and TV shows" />
+                       <NavLink href="#/series" label="Series" ariaLabel="Browse TV series" />
+                       <NavLink href="#/livetv" label="Live TV" ariaLabel="Watch live TV channels" />
+                       <NavLink href="#/kids" label="Tubi Kids" ariaLabel="Browse content safe for kids" />
                     </nav>
                 </div>
                 <div className="flex items-center space-x-4">
