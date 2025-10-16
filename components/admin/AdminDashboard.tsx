@@ -1,10 +1,15 @@
+
+
 import React, { useState } from 'react';
+// Fix: Add side-effect import to load global JSX augmentations for ion-icon.
+import '../../types';
 import Sidebar from './Sidebar';
 import StatCard from './StatCard';
 import ContentTable from './ContentTable';
 import SeriesContentTable from './SeriesContentTable';
 import UserManagementTable from './UserManagementTable';
 import LiveTVManagementTable from './LiveTVManagementTable';
+import SettingsPage from './SettingsPage';
 import type { Category, SeriesCategory, User, LiveTVChannel } from '../../types';
 
 interface AdminDashboardProps {
@@ -16,13 +21,15 @@ interface AdminDashboardProps {
     onSeriesContentUpdate: (seriesCategories: SeriesCategory[]) => void;
     liveTVChannels: LiveTVChannel[];
     onLiveTVChannelsUpdate: (channels: LiveTVChannel[]) => void;
+    siteName: string;
+    onSiteNameUpdate: (newName: string) => void;
 }
 
-type AdminView = 'dashboard' | 'content' | 'users';
+type AdminView = 'dashboard' | 'content' | 'users' | 'settings';
 
-const AdminMobileHeader: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => (
+const AdminMobileHeader: React.FC<{ onMenuClick: () => void; siteName: string }> = ({ onMenuClick, siteName }) => (
     <div className="lg:hidden flex items-center justify-between mb-6 bg-admin-sidebar p-3 rounded-lg shadow-md">
-        <a href="#/admin" className="text-xl font-bold text-white">Admin Panel</a>
+        <a href="#/admin" className="text-xl font-bold text-white">{siteName} Admin</a>
         <button onClick={onMenuClick} className="text-gray-300 hover:text-white p-2 -mr-2" aria-label="Open sidebar menu">
             <ion-icon name="menu-outline" style={{ fontSize: '28px' }}></ion-icon>
         </button>
@@ -30,7 +37,7 @@ const AdminMobileHeader: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick 
 );
 
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, categories, onContentUpdate, seriesCategories, onSeriesContentUpdate, liveTVChannels, onLiveTVChannelsUpdate }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, categories, onContentUpdate, seriesCategories, onSeriesContentUpdate, liveTVChannels, onLiveTVChannelsUpdate, siteName, onSiteNameUpdate }) => {
     const [view, setView] = useState<AdminView>('dashboard');
     const [activeContentTab, setActiveContentTab] = useState<'movies' | 'series' | 'livetv'>('movies');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -98,15 +105,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, c
                         <UserManagementTable users={users} onUpdate={onUsersUpdate} />
                      </div>
                 );
+            case 'settings':
+                return <SettingsPage siteName={siteName} onSiteNameUpdate={onSiteNameUpdate} />;
         }
     }
 
     return (
         <div className="flex min-h-screen bg-admin-bg text-gray-200 font-sans">
-            <Sidebar view={view} setView={setView} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            <Sidebar view={view} setView={setView} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} siteName={siteName} />
             <main className="flex-1 lg:pl-64">
                 <div className="p-4 sm:p-6 md:p-10">
-                    <AdminMobileHeader onMenuClick={() => setIsSidebarOpen(true)} />
+                    <AdminMobileHeader onMenuClick={() => setIsSidebarOpen(true)} siteName={siteName} />
                     {renderView()}
                 </div>
             </main>

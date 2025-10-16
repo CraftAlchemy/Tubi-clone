@@ -1,17 +1,19 @@
+
 import React from 'react';
 // Fix: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
 import '../../types';
 
-type AdminView = 'dashboard' | 'content' | 'users';
+type AdminView = 'dashboard' | 'content' | 'users' | 'settings';
 
 interface SidebarProps {
     view: AdminView;
     setView: (view: AdminView) => void;
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
+    siteName: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ view, setView, isOpen, setIsOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ view, setView, isOpen, setIsOpen, siteName }) => {
     
     const handleViewChange = (targetView: AdminView) => {
         setView(targetView);
@@ -52,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ view, setView, isOpen, setIsOpen }) =
 
             <aside className={`fixed inset-y-0 left-0 w-64 bg-admin-sidebar text-gray-300 flex flex-col shadow-lg z-40 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                 <div className="h-16 flex items-center justify-between px-4 border-b border-gray-700">
-                     <a href="#/admin" className="text-xl font-bold text-white">Admin Panel</a>
+                     <a href="#/admin" className="text-xl font-bold text-white">{siteName} Admin</a>
                      <button onClick={() => setIsOpen(false)} className="lg:hidden text-gray-400 hover:text-white" aria-label="Close sidebar">
                          <ion-icon name="close-outline" style={{ fontSize: '28px' }}></ion-icon>
                      </button>
@@ -61,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ view, setView, isOpen, setIsOpen }) =
                     <NavLink targetView="dashboard" iconName="bar-chart-outline" label="Dashboard" />
                     <NavLink targetView="content" iconName="videocam-outline" label="Content" />
                     <NavLink targetView="users" iconName="people-circle-outline" label="Users" />
-                    <NavLink targetView="dashboard" iconName="settings-outline" label="Settings" disabled />
+                    <NavLink targetView="settings" iconName="settings-outline" label="Settings" />
                 </nav>
                 <div className="px-4 py-6 border-t border-gray-700">
                      <a href="/#/" className="flex items-center px-4 py-2 rounded-lg hover:bg-admin-card">

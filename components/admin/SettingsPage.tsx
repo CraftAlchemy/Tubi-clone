@@ -1,0 +1,59 @@
+
+import React, { useState } from 'react';
+
+interface SettingsPageProps {
+    siteName: string;
+    onSiteNameUpdate: (newName: string) => void;
+}
+
+const SettingsPage: React.FC<SettingsPageProps> = ({ siteName, onSiteNameUpdate }) => {
+    const [name, setName] = useState(siteName);
+    const [isSaved, setIsSaved] = useState(false);
+
+    const handleSave = () => {
+        onSiteNameUpdate(name);
+        setIsSaved(true);
+        setTimeout(() => setIsSaved(false), 2000); // Hide message after 2 seconds
+    };
+    
+    const isSaveDisabled = name.trim() === '' || name === siteName;
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold text-white mb-8">Site Settings</h1>
+            
+            <div className="bg-admin-sidebar p-6 rounded-lg shadow-lg max-w-2xl">
+                 <h2 className="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-4">General Settings</h2>
+                 
+                 <div className="space-y-4">
+                    <div>
+                        <label htmlFor="siteName" className="block text-sm font-medium text-gray-300 mb-1">
+                            Site Name
+                        </label>
+                        <input
+                            type="text"
+                            id="siteName"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="bg-admin-card border border-gray-600 rounded-md px-3 py-2 text-white w-full focus:ring-admin-accent focus:border-admin-accent"
+                        />
+                        <p className="text-xs text-gray-400 mt-2">This will appear in the browser tab, admin panel, and ARIA labels.</p>
+                    </div>
+                 </div>
+
+                 <div className="mt-8 pt-6 border-t border-gray-700 flex items-center justify-end gap-4">
+                     {isSaved && <p className="text-green-400 text-sm animate-fade-in">Settings saved successfully!</p>}
+                     <button 
+                        onClick={handleSave}
+                        disabled={isSaveDisabled}
+                        className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-6 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                    >
+                        Save Changes
+                    </button>
+                 </div>
+            </div>
+        </div>
+    );
+};
+
+export default SettingsPage;

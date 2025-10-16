@@ -36,6 +36,7 @@ const App: React.FC = () => {
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [myList, setMyList] = useState<number[]>([]);
+    const [siteName, setSiteName] = useState('Tubi TV Clone');
 
     useEffect(() => {
         const handleHashChange = () => {
@@ -55,6 +56,10 @@ const App: React.FC = () => {
         }, 1500);
         return () => clearTimeout(timer);
     }, []);
+
+    useEffect(() => {
+        document.title = siteName;
+    }, [siteName]);
 
     const handleLogin = (email: string, password: string): boolean => {
         const user = users.find(u => u.email === email && u.password === password);
@@ -113,6 +118,12 @@ const App: React.FC = () => {
 
     const handleUsersUpdate = (updatedUsers: User[]) => {
         setUsers(updatedUsers);
+    };
+
+    const handleSiteNameUpdate = (newName: string) => {
+        if (newName.trim()) {
+            setSiteName(newName.trim());
+        }
     };
 
     const handleMovieClick = (movie: Movie) => {
@@ -209,7 +220,7 @@ const App: React.FC = () => {
             case '#/profile':
                 return currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} categories={categories} myList={myList} onMovieClick={handleMovieClick} onToggleMyList={handleToggleMyList} /> : <LoginPage onLogin={handleLogin} />;
             case '#/admin':
-                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} liveTVChannels={liveTVChannels} onLiveTVChannelsUpdate={handleLiveTVChannelsUpdate} /> : <div className="pt-24 text-center">Access Denied</div>;
+                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} liveTVChannels={liveTVChannels} onLiveTVChannelsUpdate={handleLiveTVChannelsUpdate} siteName={siteName} onSiteNameUpdate={handleSiteNameUpdate} /> : <div className="pt-24 text-center">Access Denied</div>;
             case '#/series':
                 return <SeriesPage seriesCategories={seriesCategories} onSeriesClick={handleSeriesClick} isLoading={isInitialLoading} />;
             case '#/livetv':
@@ -247,7 +258,7 @@ const App: React.FC = () => {
 
     return (
         <div className="bg-tubi-black text-white min-h-screen font-sans">
-            <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} route={route} />
+            <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} route={route} siteName={siteName} />
             <main>
                 <ErrorBoundary>
                     {renderPage()}
