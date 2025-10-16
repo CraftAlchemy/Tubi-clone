@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 // FIX: Add side-effect import to load global JSX augmentations for ion-icon.
 import '../../types';
@@ -39,14 +40,14 @@ const LiveTVManagementTable: React.FC<LiveTVManagementTableProps> = ({ channels,
         if (modal?.type === 'ADD') {
             const newChannel: LiveTVChannel = {
                 id: (channels.length > 0 ? Math.max(...channels.map(c => c.id)) : 0) + 1,
-                name: formData.name,
-                logoUrl: formData.logoUrl,
-                streamUrl: formData.streamUrl,
+                name: formData.name!,
+                logoUrl: formData.logoUrl!,
+                streamUrl: formData.streamUrl!,
             };
             onUpdate([...channels, newChannel]);
         } else if (modal?.type === 'EDIT') {
             const updatedChannels = channels.map(c =>
-                c.id === formData.id ? { ...c, ...formData } : c
+                c.id === formData.id ? { ...c, ...formData } as LiveTVChannel : c
             );
             onUpdate(updatedChannels);
         }

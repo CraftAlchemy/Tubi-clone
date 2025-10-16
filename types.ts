@@ -1,82 +1,93 @@
-import React from 'react';
 
-// The `declare global` block augments React's JSX types to include the custom `ion-icon` element.
-// This file is treated as a module because it contains exports, which ensures
-// that this declaration correctly merges with existing JSX definitions rather than overwriting them.
+
+// Augment the global JSX namespace to include type definitions for the `<ion-icon>` web component.
+// This allows TypeScript to recognize <ion-icon> as a valid JSX element.
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      // FIX: Use a more specific type for ion-icon to ensure TypeScript recognizes it across all components.
+      'ion-icon': {
+        name?: string;
+        src?: string;
+        icon?: string;
+        size?: 'small' | 'large';
+        class?: string;
+        style?: { [key: string]: string | number };
+        [key: string]: any;
+      };
+    }
+  }
+}
+
+export interface User {
+    id: number;
+    email: string;
+    password?: string;
+    role: 'admin' | 'user';
+    tokens: number;
+}
 
 export interface Movie {
   id: number;
   title: string;
+  description: string;
   posterUrl: string;
-  description?: string;
   videoUrl?: string;
   trailerUrl?: string;
-  tokenCost?: number; // Cost to watch the movie
+  tokenCost?: number;
 }
 
 export interface Category {
-  title:string;
+  title: string;
   movies: Movie[];
 }
 
 export interface Episode {
-  id: number;
-  title: string;
-  posterUrl: string;
-  description?: string;
-  videoUrl?: string;
-  duration?: string;
+    id: number;
+    title:string;
+    posterUrl: string;
+    description: string;
+    videoUrl: string;
+    duration: string;
 }
 
 export interface Season {
-  id: number;
-  title: string;
-  episodes: Episode[];
+    id: number;
+    title: string;
+    episodes: Episode[];
 }
 
 export interface Series {
-  id: number;
-  title: string;
-  posterUrl: string;
-  description?: string;
-  seasons: Season[];
+    id: number;
+    title: string;
+    posterUrl: string;
+    description: string;
+    seasons: Season[];
 }
 
 export interface SeriesCategory {
-  title: string;
-  series: Series[];
-}
-
-export interface User {
-  id: number;
-  email: string;
-  password?: string; // Password should not be passed around
-  role: 'user' | 'admin';
-  tokens: number; // User's token balance
+    title: string;
+    series: Series[];
 }
 
 export interface LiveTVChannel {
-  id: number;
-  name: string;
-  logoUrl: string;
-  streamUrl: string;
+    id: number;
+    name: string;
+    logoUrl: string;
+    streamUrl: string;
 }
 
 export interface Advertisement {
-  id: number;
-  title: string;
-  videoUrl: string;
-  duration: number; // in seconds
-  tokenReward: number;
+    id: number;
+    title: string;
+    videoUrl: string;
+    duration: number; // in seconds
+    tokenReward: number;
 }
 
-
-// Add global declaration for ion-icon to fix TypeScript errors.
-// Fix: Use `declare global` to augment JSX's IntrinsicElements from within a module.
-declare global {
-    namespace JSX {
-        interface IntrinsicElements {
-            'ion-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { name?: string }, HTMLElement>;
-        }
-    }
+export interface TokenPack {
+    id: number;
+    amount: number;
+    price: number;
+    isBestValue: boolean;
 }

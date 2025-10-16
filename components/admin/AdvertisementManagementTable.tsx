@@ -30,7 +30,7 @@ const AdvertisementManagementTable: React.FC<AdvertisementManagementTableProps> 
     };
 
     const handleSubmit = () => {
-        if (!formData.title || !formData.videoUrl || !formData.duration || !formData.tokenReward) {
+        if (!formData.title || !formData.videoUrl || (formData.duration === undefined) || (formData.tokenReward === undefined)) {
             alert('All fields are required.');
             return;
         }

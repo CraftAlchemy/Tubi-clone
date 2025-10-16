@@ -1,284 +1,101 @@
 
+
 import React, { useState, useEffect } from 'react';
 import type { User } from '../types';
 
 interface HeaderProps {
+    siteName: string;
     currentUser: User | null;
     onLogout: () => void;
-    onSearch: (query: string) => void;
-    route: string;
-    siteName: string;
+    onBuyTokensClick: () => void;
     isCartoonSectionEnabled: boolean;
 }
 
-const MobileMenu: React.FC<{
-    isOpen: boolean;
-    onClose: () => void;
-    currentUser: User | null;
-    onLogout: () => void;
-    onSearch: (query: string) => void;
-    siteName: string;
-    isCartoonSectionEnabled: boolean;
-}> = ({ isOpen, onClose, currentUser, onLogout, onSearch, siteName, isCartoonSectionEnabled }) => {
-    
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const query = event.target.value;
-        setSearchQuery(query);
-        onSearch(query);
-    };
-
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, [isOpen]);
-
-    if (!isOpen) return null;
-
-    return (
-        <div 
-            className="fixed inset-0 bg-myflix-black z-[100] p-4 flex flex-col animate-fade-in"
-            role="dialog"
-            aria-modal="true"
-        >
-            <div className="flex items-center justify-between flex-shrink-0">
-                <a href="/#/" onClick={onClose} title="Go to homepage" aria-label={`${siteName} Homepage`}><MyflixLogo siteName={siteName} /></a>
-                <button onClick={onClose} aria-label="Close menu" className="text-white">
-                    <CloseIcon />
-                </button>
-            </div>
-            
-            <div className="mt-8 flex-grow overflow-y-auto">
-                 <div className="relative mb-6">
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                        className="bg-myflix-gray border-2 border-transparent focus:border-myflix-light-gray focus:ring-0 rounded-full pl-4 pr-10 py-2 w-full text-base text-white"
-                        aria-label="Search for content"
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <SearchIcon />
-                    </div>
-                </div>
-
-                <nav className="flex flex-col space-y-4">
-                     <a href="/#/" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Browse</a>
-                     <a href="#/series" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Series</a>
-                     <a href="#/livetv" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Live TV</a>
-                     {isCartoonSectionEnabled && <a href="#/cartoon" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Cartoon</a>}
-                     <a href="#/earn-tokens" onClick={onClose} className="text-yellow-400 text-lg hover:text-yellow-300 p-2 rounded-md transition-colors">Earn Tokens</a>
-                </nav>
-            </div>
-
-            <div className="flex-shrink-0 py-4 border-t border-gray-800">
-                {currentUser ? (
-                     <div className="flex flex-col space-y-4">
-                        <a href="#/profile" onClick={onClose} className="flex items-center text-lg font-semibold text-white p-2 rounded-md transition-colors">
-                            <UserIcon />
-                            <span className="ml-3">Profile</span>
-                        </a>
-                         <a href="#/earn-tokens" onClick={onClose} className="flex items-center justify-center text-lg font-semibold bg-yellow-500 text-black px-4 py-2.5 rounded-full hover:opacity-80 transition-opacity">
-                            <TokenIcon />
-                            <span className="ml-2">Tokens: {currentUser.tokens}</span>
-                        </a>
-                        <button onClick={() => { onLogout(); onClose(); }} className="w-full text-lg font-semibold bg-white text-black px-4 py-2.5 rounded-full hover:opacity-80 transition-opacity">
-                            Sign Out
-                        </button>
-                    </div>
-                ) : (
-                    <div className="flex flex-col space-y-4">
-                        <a href="#/login" onClick={onClose} className="w-full text-center text-lg font-semibold border border-white px-4 py-2.5 rounded-full hover:bg-white hover:text-black transition-colors">
-                            Sign In
-                        </a>
-                        <a href="#/register" onClick={onClose} className="w-full text-center text-lg font-semibold bg-white text-black px-4 py-2.5 rounded-full hover:opacity-80 transition-opacity">
-                            Register
-                        </a>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
-
-const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route, siteName, isCartoonSectionEnabled }) => {
+const Header: React.FC<HeaderProps> = ({ siteName, currentUser, onLogout, onBuyTokensClick, isCartoonSectionEnabled }) => {
     const [isScrolled, setIsScrolled] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 10) {
-                setIsScrolled(true);
-            } else {
-                setIsScrolled(false);
-            }
+            setIsScrolled(window.scrollY > 10);
         };
-
         window.addEventListener('scroll', handleScroll);
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const query = event.target.value;
-        setSearchQuery(query);
-        onSearch(query);
-    };
+    const navLinks = [
+        { name: 'Home', href: '/#/' },
+        { name: 'Series', href: '#/series' },
+    ];
 
-    const NavLink: React.FC<{ href: string; label: string; ariaLabel: string, isCta?: boolean }> = ({ href, label, ariaLabel, isCta = false }) => {
-        const isBrowseActive = (href === "/#/" && (route === '' || route === '#/'));
-        const isActive = isBrowseActive || route === href;
+    if (isCartoonSectionEnabled) {
+        navLinks.push({ name: 'Cartoons', href: '#/cartoon' });
+    }
+    navLinks.push({ name: 'Live TV', href: '#/livetv' });
 
-        const activeClasses = 'bg-myflix-gray text-white';
-        const inactiveClasses = 'text-gray-300 hover:bg-myflix-gray hover:text-white';
-        const ctaClasses = 'text-yellow-400 hover:text-yellow-300 hover:bg-myflix-gray';
-
-        return (
-            <a href={href} className={`px-3 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${isActive ? activeClasses : isCta ? ctaClasses : inactiveClasses}`} aria-label={ariaLabel}>
-                {label}
-            </a>
-        );
-    };
 
     return (
-        <>
-            <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-myflix-black bg-opacity-95' : 'bg-transparent'}`}>
-                <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-16 py-4">
+        <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-myflix-black' : 'bg-transparent'}`}>
+            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-16">
+                <div className="flex items-center justify-between h-16 md:h-20">
                     <div className="flex items-center space-x-8">
-                         <a href="/#/" title="Go to homepage" aria-label={`${siteName} Homepage`}><MyflixLogo siteName={siteName} /></a>
-                        <nav className="hidden md:flex items-center space-x-2">
-                           <NavLink href="/#/" label="Browse" ariaLabel="Browse all movies and TV shows" />
-                           <NavLink href="#/series" label="Series" ariaLabel="Browse TV series" />
-                           <NavLink href="#/livetv" label="Live TV" ariaLabel="Watch live TV channels" />
-                           {isCartoonSectionEnabled && <NavLink href="#/cartoon" label="Cartoon" ariaLabel="Browse cartoon content" />}
-                           {currentUser && <NavLink href="#/earn-tokens" label="Earn Tokens" ariaLabel="Earn tokens by watching ads" isCta />}
+                        <a href="/#/" className="text-2xl md:text-3xl font-bold text-myflix-red tracking-wider">
+                           {siteName.toUpperCase()}
+                        </a>
+                        <nav className="hidden lg:flex items-center space-x-6">
+                            {navLinks.map(link => (
+                                <a key={link.name} href={link.href} className="text-white hover:text-gray-300 transition-colors text-sm font-medium">
+                                    {link.name}
+                                </a>
+                            ))}
                         </nav>
                     </div>
-                    <div className="hidden md:flex items-center space-x-4">
-                         <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                className="bg-myflix-gray border-2 border-transparent focus:border-myflix-light-gray focus:ring-0 rounded-full pl-4 pr-10 py-1.5 w-40 md:w-64 text-sm text-white transition-width duration-300"
-                                aria-label="Search for content"
-                            />
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <SearchIcon />
-                            </div>
-                        </div>
+                    <div className="flex items-center space-x-4">
                         {currentUser ? (
-                             <>
-                                <a href="#/earn-tokens" title="View your token balance" aria-label="Token balance" className="hidden md:flex items-center text-sm font-semibold border border-yellow-500/50 bg-yellow-500/10 text-yellow-300 px-4 py-1.5 rounded-full hover:bg-yellow-500/20 transition-colors">
-                                    <TokenIcon />
-                                    <span className="ml-2">{currentUser.tokens}</span>
+                            <div className="relative group">
+                                <a href="#/profile" className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white">
+                                        {currentUser.email.charAt(0).toUpperCase()}
+                                    </div>
+                                    <span className="hidden md:block text-white text-sm font-medium">{currentUser.tokens} Tokens</span>
                                 </a>
-                                <a href="#/profile" title="View your profile" aria-label="View your profile" className="hidden md:flex items-center text-sm font-semibold text-white hover:text-gray-300 transition-colors">
-                                    <UserIcon />
-                                </a>
-                                <button onClick={onLogout} className="text-sm font-semibold bg-white text-black px-4 py-1.5 rounded-full hover:opacity-80 transition-opacity">
-                                    Sign Out
-                                </button>
-                            </>
+                                <div className="absolute top-full right-0 mt-2 w-48 bg-myflix-gray rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+                                    <div className="py-1">
+                                        <a href="#/profile" className="block px-4 py-2 text-sm text-gray-200 hover:bg-myflix-black/50">Profile</a>
+                                        <a href="#/earn-tokens" className="block px-4 py-2 text-sm text-gray-200 hover:bg-myflix-black/50">Earn Tokens</a>
+                                        <button onClick={onBuyTokensClick} className="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-myflix-black/50">Buy Tokens</button>
+                                        {currentUser.role === 'admin' && <a href="#/admin" className="block px-4 py-2 text-sm text-gray-200 hover:bg-myflix-black/50">Admin Panel</a>}
+                                        <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-myflix-black/50">Sign Out</button>
+                                    </div>
+                                </div>
+                            </div>
                         ) : (
-                            <>
-                                <a href="#/login" className="hidden md:block text-sm font-semibold border border-white px-4 py-1.5 rounded-full hover:bg-white hover:text-black transition-colors">
-                                    Sign In
-                                </a>
-                                <a href="#/register" className="text-sm font-semibold bg-white text-black px-4 py-1.5 rounded-full hover:opacity-80 transition-opacity">
-                                    Register
-                                </a>
-                            </>
+                            <a href="#/login" className="bg-myflix-red text-white text-sm font-bold px-4 py-2 rounded-md hover:opacity-80 transition-opacity">
+                                Sign In
+                            </a>
                         )}
-                    </div>
-
-                     {/* Mobile controls */}
-                    <div className="flex md:hidden items-center">
-                        <button onClick={() => setIsMobileMenuOpen(true)} className="text-white p-1" aria-label="Open menu">
-                            <MenuIcon />
+                        <button className="lg:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
                         </button>
                     </div>
                 </div>
-            </header>
-             <MobileMenu 
-                isOpen={isMobileMenuOpen}
-                onClose={() => setIsMobileMenuOpen(false)}
-                currentUser={currentUser}
-                onLogout={onLogout}
-                onSearch={onSearch}
-                siteName={siteName}
-                isCartoonSectionEnabled={isCartoonSectionEnabled}
-            />
-        </>
+            </div>
+            {/* Mobile Menu */}
+            {isMenuOpen && (
+                <div className="lg:hidden bg-myflix-black/90 backdrop-blur-sm">
+                    <nav className="flex flex-col items-center space-y-4 py-4">
+                        {navLinks.map(link => (
+                            <a key={link.name} href={link.href} onClick={() => setIsMenuOpen(false)} className="text-white hover:text-gray-300 transition-colors">
+                                {link.name}
+                            </a>
+                        ))}
+                    </nav>
+                </div>
+            )}
+        </header>
     );
 };
-
-const MyflixLogo: React.FC<{ siteName: string }> = ({ siteName }) => (
-    <span className="text-3xl font-black tracking-tighter text-myflix-red" style={{ fontFamily: 'system-ui, sans-serif' }}>
-        {siteName.toUpperCase()}
-    </span>
-);
-
-
-const SearchIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 text-myflix-light-gray"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-    >
-        <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-    </svg>
-);
-
-const UserIcon = () => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        className="h-6 w-6" 
-        viewBox="0 0 20 20" 
-        fill="currentColor"
-        aria-hidden="true">
-        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-    </svg>
-);
-
-const MenuIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-);
-const CloseIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-);
-
-const TokenIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.414L11 10.586V6z" clipRule="evenodd" />
-        <path d="M10 2a1 1 0 00-1 1v1a1 1 0 102 0V3a1 1 0 00-1-1zM4.22 5.64a1 1 0 00-1.42-1.42l-.71.71a1 1 0 001.42 1.42l.7-.71zM16.9 15.46a1 1 0 00-1.42 1.42l.71.71a1 1 0 001.42-1.42l-.7-.71zM17.62 4.22a1 1 0 00-1.42-1.42l-.7.71a1 1 0 101.42 1.42l.7-.71zM4.93 16.9a1 1 0 00-1.42 1.42l.7.7a1 1 0 001.42-1.42l-.7-.7zM18 10a1 1 0 00-1-1h-1a1 1 0 100 2h1a1 1 0 001-1zM3 10a1 1 0 00-1-1H1a1 1 0 100 2h1a1 1 0 001-1z" />
-    </svg>
-);
-
 
 export default Header;

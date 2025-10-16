@@ -1,118 +1,141 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Carousel from './components/Carousel';
+import MovieDetail from './components/MovieDetail';
+import VideoPlayer from './components/VideoPlayer';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import ProfilePage from './components/ProfilePage';
-import MovieDetail from './components/MovieDetail';
-import VideoPlayer from './components/VideoPlayer';
 import AdminDashboard from './components/admin/AdminDashboard';
 import SeriesPage from './components/SeriesPage';
 import SeriesDetail from './components/SeriesDetail';
-import LiveTVPage from './components/LiveTVPage';
 import CartoonPage from './components/CartoonPage';
-import Footer from './components/Footer';
+import LiveTVPage from './components/LiveTVPage';
 import FAQPage from './components/FAQPage';
 import EarnTokensPage from './components/EarnTokensPage';
 import TokenPromptModal from './components/TokenPromptModal';
+import BuyTokensModal from './components/BuyTokensModal';
+import Footer from './components/Footer';
+import HeroSkeleton from './components/skeletons/HeroSkeleton';
 import CarouselSkeleton from './components/skeletons/CarouselSkeleton';
-import ErrorBoundary from './components/ErrorBoundary';
-import { HERO_MOVIE, generateMoreCategories, CATEGORIES, SERIES_CATEGORIES, LIVE_TV_CHANNELS, CARTOON_CATEGORIES } from './data/movies';
+
+import { HERO_MOVIE, CATEGORIES, SERIES_CATEGORIES, CARTOON_CATEGORIES, LIVE_TV_CHANNELS } from './data/movies';
 import { USERS } from './data/users';
+// FIX: Import SeriesCategory and LiveTVChannel types.
+import type { User, Movie, Category, Episode, Series, Advertisement, TokenPack, SeriesCategory, LiveTVChannel } from './types';
+import { TOKEN_PACKS } from './data/tokenPacks';
 import { ADVERTISEMENTS } from './data/advertisements';
-import type { User, Category, Movie, SeriesCategory, Series, Episode, LiveTVChannel, Advertisement } from './types';
+
+const API_BASE_URL = 'http://127.0.0.1:8080/api';
 
 const App: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [siteName, setSiteName] = useState('Myflix');
+    const [myList, setMyList] = useState<number[]>([]);
+    
+    const [selectedContent, setSelectedContent] = useState<Movie | Series | null>(null);
+    const [playingContent, setPlayingContent] = useState<Movie | Episode | Advertisement | null>(null);
+    
+    const [showTokenPrompt, setShowTokenPrompt] = useState<Movie | null>(null);
+    const [showBuyTokens, setShowBuyTokens] = useState(false);
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [currentPath, setCurrentPath] = useState(window.location.hash || '#/');
+
+    // --- Admin state (using local data for now) ---
     const [users, setUsers] = useState<User[]>(USERS);
-    const [categories, setCategories] = useState<Category[]>(CATEGORIES);
     const [seriesCategories, setSeriesCategories] = useState<SeriesCategory[]>(SERIES_CATEGORIES);
-    const [cartoonCategories, setCartoonCategories] = useState<Category[]>(CARTOON_CATEGORIES);
     const [liveTVChannels, setLiveTVChannels] = useState<LiveTVChannel[]>(LIVE_TV_CHANNELS);
     const [advertisements, setAdvertisements] = useState<Advertisement[]>(ADVERTISEMENTS);
-    const [route, setRoute] = useState(window.location.hash);
-    
-    // State for modals/details
-    const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
-    const [selectedSeries, setSelectedSeries] = useState<Series | null>(null);
-    const [playingContent, setPlayingContent] = useState<Movie | Episode | Advertisement | null>(null);
-    const [showTokenPrompt, setShowTokenPrompt] = useState(false);
-    
-    const [searchQuery, setSearchQuery] = useState('');
-    const [page, setPage] = useState(1);
-    const [isInitialLoading, setIsInitialLoading] = useState(true);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [myList, setMyList] = useState<number[]>([]);
-    const [siteName, setSiteName] = useState('Myflix');
+    const [tokenPacks, setTokenPacks] = useState<TokenPack[]>(TOKEN_PACKS);
     const [isCartoonSectionEnabled, setIsCartoonSectionEnabled] = useState(true);
+
+    // --- Data Fetching and State Initialization ---
+    useEffect(() => {
+        const fetchContent = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch site config
+                const configRes = await fetch(`${API_BASE_URL}/config`);
+                if (configRes.ok) {
+                    const configData = await configRes.json();
+                    setSiteName(configData.siteName || 'Myflix');
+                } else {
+                     throw new Error('Failed to fetch config');
+                }
+
+                // Fetch movie/category content
+                const contentRes = await fetch(`${API_BASE_URL}/content`);
+                 if (contentRes.ok) {
+                    const contentData = await contentRes.json();
+                    setCategories(contentData);
+                } else {
+                    throw new Error('Failed to fetch content');
+                }
+            } catch (error) {
+                console.error("Failed to fetch initial data:", error);
+                console.log("Could not connect to the backend server. This is expected if the server is not running. Falling back to local mock data. To run the server, use 'npm start' in the project root.");
+                 // Fallback to local data if API fails
+                setSiteName('Myflix');
+                setCategories(CATEGORIES);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchContent();
+
+        // Load user from local storage
+        const storedUser = localStorage.getItem('myflix-user');
+        if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            // Sync with main users list to get latest info (like tokens)
+            const syncedUser = users.find(u => u.id === parsedUser.id);
+            setCurrentUser(syncedUser || parsedUser);
+        }
+         const storedList = localStorage.getItem('myflix-list');
+        if (storedList) {
+            setMyList(JSON.parse(storedList));
+        }
+
+    }, []);
 
     useEffect(() => {
         const handleHashChange = () => {
-            setRoute(window.location.hash);
-            // Close any open modals on route change
-            setSelectedMovie(null);
-            setSelectedSeries(null);
+            setCurrentPath(window.location.hash || '#/');
         };
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
     }, []);
-
-    useEffect(() => {
-        const fetchConfig = async () => {
-            try {
-                const response = await fetch('/api/config');
-                if (response.ok) {
-                    const config = await response.json();
-                    if (config.siteName) {
-                        setSiteName(config.siteName);
-                    }
-                }
-            } catch (error) {
-                console.error("Failed to fetch site config:", error);
-            }
-        };
-        fetchConfig();
-    }, []);
     
+    // --- User and List Persistence ---
     useEffect(() => {
-        // Simulate initial data loading
-        const timer = setTimeout(() => {
-            setIsInitialLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
-    }, []);
+        if (currentUser) {
+            localStorage.setItem('myflix-user', JSON.stringify(currentUser));
+             // Also update the main users array
+            setUsers(prevUsers => prevUsers.map(u => u.id === currentUser.id ? currentUser : u));
+        } else {
+            localStorage.removeItem('myflix-user');
+        }
+    }, [currentUser]);
 
     useEffect(() => {
-        document.title = siteName;
-    }, [siteName]);
+        localStorage.setItem('myflix-list', JSON.stringify(myList));
+    }, [myList]);
 
+    // --- Handlers ---
     const handleLogin = (email: string, password: string): boolean => {
         const user = users.find(u => u.email === email && u.password === password);
         if (user) {
-            // Fix: Use object destructuring to safely remove password and maintain type correctness.
-            const { password: _password, ...userToStore } = user;
-            setCurrentUser(userToStore);
-            
-            const storedList = localStorage.getItem(`my-list-${user.id}`);
-            if (storedList) {
-                // Fix: `JSON.parse` returns `any`. Explicitly cast to `number[]` to ensure type safety.
-                setMyList(JSON.parse(storedList) as number[]);
-            } else {
-                setMyList([]);
-            }
-
-            window.location.hash = user.role === 'admin' ? '/admin' : '/';
+            setCurrentUser(user);
+            window.location.hash = '#/';
             return true;
         }
         return false;
-    };
-
-    const handleLogout = () => {
-        setCurrentUser(null);
-        setMyList([]);
-        window.location.hash = '/';
     };
 
     const handleRegister = (email: string, password: string): boolean => {
@@ -124,257 +147,210 @@ const App: React.FC = () => {
             email,
             password,
             role: 'user',
-            tokens: 5, // Starting tokens for new users
+            tokens: 10, // Starting tokens
         };
-        const updatedUsers = [...users, newUser];
-        setUsers(updatedUsers);
-        handleLogin(email, password);
+        setUsers(prev => [...prev, newUser]);
+        setCurrentUser(newUser);
+        window.location.hash = '#/';
         return true;
     };
-    
-    const handleContentUpdate = (updatedCategories: Category[]) => {
-        setCategories(updatedCategories);
-    };
-    
-    const handleSeriesContentUpdate = (updatedSeriesCategories: SeriesCategory[]) => {
-        setSeriesCategories(updatedSeriesCategories);
+
+    const handleLogout = () => {
+        setCurrentUser(null);
+        setMyList([]);
+        window.location.hash = '#/login';
     };
 
-    const handleLiveTVChannelsUpdate = (updatedChannels: LiveTVChannel[]) => {
-        setLiveTVChannels(updatedChannels);
+    const handleToggleMyList = (contentId: number) => {
+        setMyList(prevList =>
+            prevList.includes(contentId)
+                ? prevList.filter(id => id !== contentId)
+                : [...prevList, contentId]
+        );
     };
 
-    const handleAdvertisementsUpdate = (updatedAds: Advertisement[]) => {
-        setAdvertisements(updatedAds);
-    };
-
-    const handleUsersUpdate = (updatedUsers: User[]) => {
-        setUsers(updatedUsers);
-        // If the current user was updated, reflect those changes
-        if (currentUser) {
-            const updatedCurrentUser = updatedUsers.find(u => u.id === currentUser.id);
-            if (updatedCurrentUser) {
-                const { password: _password, ...userToStore } = updatedCurrentUser;
-                setCurrentUser(userToStore);
+    const handlePlay = (content: Movie | Episode) => {
+         if ('tokenCost' in content && content.tokenCost) {
+            if (!currentUser || currentUser.tokens < content.tokenCost) {
+                setShowTokenPrompt(content as Movie);
+                return;
             }
+            setCurrentUser(prevUser => prevUser ? { ...prevUser, tokens: prevUser.tokens - (content.tokenCost || 0) } : null);
+        }
+        setPlayingContent(content);
+        setSelectedContent(null);
+    };
+
+    const handleTokensEarned = (amount: number) => {
+        setCurrentUser(prev => prev ? { ...prev, tokens: prev.tokens + amount } : null);
+    };
+
+    const handleTokenPurchase = (pack: TokenPack) => {
+        setCurrentUser(prev => prev ? { ...prev, tokens: prev.tokens + pack.amount } : null);
+        setShowBuyTokens(false);
+    };
+    
+    const handleContentUpdate = async (updatedCategories: Category[]) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/content`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedCategories),
+            });
+            if (!response.ok) throw new Error('Failed to update content');
+            setCategories(updatedCategories);
+        } catch (error) {
+            console.error("Error updating content:", error);
+            alert("Failed to save content changes.");
         }
     };
 
     const handleSiteNameUpdate = async (newName: string) => {
-        const trimmedName = newName.trim();
-        if (trimmedName && trimmedName !== siteName) {
-            try {
-                const response = await fetch('/api/config', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ siteName: trimmedName })
-                });
-                if (response.ok) {
-                    setSiteName(trimmedName);
-                } else {
-                    console.error("Failed to update site name on server");
-                }
-            } catch (error) {
-                console.error("Error updating site name:", error);
-            }
+        try {
+            const response = await fetch(`${API_BASE_URL}/config`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ siteName: newName }),
+            });
+            if (!response.ok) throw new Error('Failed to update site name');
+            setSiteName(newName);
+        } catch (error) {
+             console.error("Error updating site name:", error);
+             alert("Failed to save site name.");
+             throw error; // re-throw for the component to handle
         }
-    };
-
-    const handleToggleCartoonSection = (isEnabled: boolean) => {
-        setIsCartoonSectionEnabled(isEnabled);
-    };
-
-    const handleMovieClick = (movie: Movie) => {
-        setSelectedMovie(movie);
-        setSelectedSeries(null);
     };
     
-    const handleSeriesClick = (series: Series) => {
-        setSelectedSeries(series);
-        setSelectedMovie(null);
-    };
+    const closeAllModals = useCallback(() => {
+        setSelectedContent(null);
+        setPlayingContent(null);
+        setShowTokenPrompt(null);
+        setShowBuyTokens(false);
+    }, []);
 
-    const handlePlayMovie = (movie: Movie) => {
-        if (!currentUser) {
-            window.location.hash = '/login';
-            return;
-        }
-        
-        const cost = movie.tokenCost || 0;
-        if (currentUser.tokens < cost) {
-            setShowTokenPrompt(true);
-            return;
-        }
-
-        if (cost > 0) {
-            const updatedUser = { ...currentUser, tokens: currentUser.tokens - cost };
-            setCurrentUser(updatedUser);
-            // Also update the main users list
-            setUsers(users.map(u => u.id === currentUser.id ? { ...u, tokens: u.tokens - cost } : u));
-        }
-        
-        setPlayingContent(movie);
-    };
-
-    const handlePlayEpisode = (episode: Episode) => {
-        setPlayingContent(episode);
-    };
-    
-    const handlePlayAd = (ad: Advertisement) => {
-        setPlayingContent(ad);
-    };
-
-    const handleAdFinished = (ad: Advertisement) => {
-        if (!currentUser) return;
-
-        const reward = ad.tokenReward;
-        const updatedUser = { ...currentUser, tokens: currentUser.tokens + reward };
-        setCurrentUser(updatedUser);
-        setUsers(users.map(u => u.id === currentUser.id ? { ...u, tokens: u.tokens + reward } : u));
-    };
-
-    const handleCloseDetail = () => {
-        setSelectedMovie(null);
-        setSelectedSeries(null);
-    };
-    
-    const handleSearch = (query: string) => {
-        setSearchQuery(query);
-    };
-
-    const handleToggleMyList = (movieId: number) => {
-        if (!currentUser) return;
-        const isMovieInList = myList.includes(movieId);
-        let updatedList: number[];
-        if (isMovieInList) {
-            updatedList = myList.filter(id => id !== movieId);
-        } else {
-            updatedList = [...myList, movieId];
-        }
-        setMyList(updatedList);
-        localStorage.setItem(`my-list-${currentUser.id}`, JSON.stringify(updatedList));
-    };
-
-    const loadMoreCategories = useCallback(() => {
-        if (isLoadingMore || route === '#/series' || route === '#/livetv') return;
-        setIsLoadingMore(true);
-        setTimeout(() => { 
-            const newCategories = generateMoreCategories(page + 1);
-            setCategories(prev => [...prev, ...newCategories]);
-            setPage(prev => prev + 1);
-            setIsLoadingMore(false);
-        }, 500);
-    }, [page, isLoadingMore, route]);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            if (window.innerHeight + document.documentElement.scrollTop < document.documentElement.offsetHeight - 500 || isLoadingMore) {
-                return;
-            }
-            loadMoreCategories();
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [isLoadingMore, loadMoreCategories]);
-
-    const allMovies = categories.flatMap(cat => cat.movies).concat(HERO_MOVIE);
-    const uniqueMovies = Array.from(new Map(allMovies.map(m => [m.id, m])).values());
-    
-    const myListMovies = myList
-        .map(id => uniqueMovies.find(movie => movie.id === id))
-        .filter((movie): movie is Movie => movie !== undefined);
-
-    let categoriesToShow = searchQuery 
-        ? categories.map(category => ({
-            ...category,
-            movies: category.movies.filter(movie => movie.title.toLowerCase().includes(searchQuery.toLowerCase()))
-          })).filter(category => category.movies.length > 0)
-        : [...categories];
-
-    if (currentUser && myListMovies.length > 0 && !searchQuery) {
-        const myListCategory: Category = {
-            title: 'My List',
-            movies: myListMovies
-        };
-        categoriesToShow.unshift(myListCategory);
-    }
+    // --- Render Logic ---
 
     const renderPage = () => {
-        switch (route) {
+        if (currentPath.startsWith('#/admin')) {
+            if (currentUser?.role === 'admin') {
+                return (
+                    <AdminDashboard 
+                        siteName={siteName} 
+                        categories={categories} 
+                        onContentUpdate={handleContentUpdate} 
+                        onSiteNameUpdate={handleSiteNameUpdate}
+                        // Pass admin state and handlers
+                        users={users}
+                        onUsersUpdate={setUsers}
+                        seriesCategories={seriesCategories}
+                        onSeriesCategoriesUpdate={setSeriesCategories}
+                        liveTVChannels={liveTVChannels}
+                        onLiveTVChannelsUpdate={setLiveTVChannels}
+                        advertisements={advertisements}
+                        onAdvertisementsUpdate={setAdvertisements}
+                        tokenPacks={tokenPacks}
+                        onTokenPacksUpdate={setTokenPacks}
+                        isCartoonSectionEnabled={isCartoonSectionEnabled}
+                        onCartoonSectionToggle={setIsCartoonSectionEnabled}
+                    />
+                );
+            } else {
+                // Redirect to home if not admin
+                window.location.hash = '#/';
+                return null;
+            }
+        }
+
+        switch (currentPath) {
             case '#/login':
                 return <LoginPage onLogin={handleLogin} />;
             case '#/register':
                 return <RegisterPage onRegister={handleRegister} />;
             case '#/profile':
-                return currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} categories={categories} myList={myList} onMovieClick={handleMovieClick} onToggleMyList={handleToggleMyList} /> : <LoginPage onLogin={handleLogin} />;
-            case '#/admin':
-                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} liveTVChannels={liveTVChannels} onLiveTVChannelsUpdate={handleLiveTVChannelsUpdate} advertisements={advertisements} onAdvertisementsUpdate={handleAdvertisementsUpdate} siteName={siteName} onSiteNameUpdate={handleSiteNameUpdate} isCartoonSectionEnabled={isCartoonSectionEnabled} onToggleCartoonSection={handleToggleCartoonSection} /> : <div className="pt-24 text-center">Access Denied</div>;
+                return currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} categories={categories} myList={myList} onMovieClick={(movie) => setSelectedContent(movie)} onToggleMyList={handleToggleMyList} /> : <LoginPage onLogin={handleLogin} />;
             case '#/series':
-                return <SeriesPage seriesCategories={seriesCategories} onSeriesClick={handleSeriesClick} isLoading={isInitialLoading} />;
-            case '#/livetv':
-                return <LiveTVPage channels={liveTVChannels} />;
+                return <SeriesPage seriesCategories={seriesCategories} onSeriesClick={(series) => setSelectedContent(series)} isLoading={isLoading} />;
             case '#/cartoon':
-                if (!isCartoonSectionEnabled) {
-                    window.location.hash = '/';
+                 if (!isCartoonSectionEnabled) {
+                    window.location.hash = '#/';
                     return null;
                 }
-                return <CartoonPage 
-                    categories={cartoonCategories} 
-                    onMovieClick={handleMovieClick}
-                    myList={myList}
-                    onToggleMyList={handleToggleMyList}
-                    currentUser={currentUser}
-                    isLoading={isInitialLoading}
-                />;
+                return <CartoonPage categories={CARTOON_CATEGORIES} onMovieClick={(movie) => setSelectedContent(movie)} myList={myList} onToggleMyList={handleToggleMyList} currentUser={currentUser} isLoading={isLoading} />;
+            case '#/livetv':
+                return <LiveTVPage channels={liveTVChannels} />;
             case '#/faq':
                 return <FAQPage siteName={siteName} />;
-            case '#/earn-tokens':
-                return <EarnTokensPage advertisements={advertisements} onPlayAd={handlePlayAd} />;
+             case '#/earn-tokens':
+                return <EarnTokensPage user={currentUser} onTokensEarned={handleTokensEarned} onBuyTokensClick={() => setShowBuyTokens(true)} advertisements={advertisements} onPlayAd={(ad) => setPlayingContent(ad)} />;
+            case '#/':
             default:
                 return (
                     <>
-                        <ErrorBoundary fallback={<div className="h-[60vh] md:h-[85vh] w-full bg-myflix-gray flex items-center justify-center p-4 text-center"><p className="text-xl font-bold text-red-400">The hero section failed to load. Please refresh the page.</p></div>}>
-                            <Hero movie={HERO_MOVIE} myList={myList} onToggleMyList={handleToggleMyList} currentUser={currentUser} onPlay={handlePlayMovie} isLoading={isInitialLoading} />
-                        </ErrorBoundary>
+                        <Hero 
+                            movie={HERO_MOVIE} 
+                            myList={myList}
+                            onToggleMyList={handleToggleMyList}
+                            currentUser={currentUser}
+                            onPlay={handlePlay}
+                            isLoading={isLoading}
+                        />
                         <div className="px-4 sm:px-6 md:px-8 lg:px-16 py-8 space-y-12">
-                             <ErrorBoundary>
-                                {isInitialLoading ? (
-                                    Array.from({ length: 5 }).map((_, index) => <CarouselSkeleton key={index} />)
-                                ) : (
-                                    categoriesToShow.map((category) => (
-                                        <Carousel 
-                                            key={category.title} 
-                                            title={category.title} 
-                                            movies={category.movies}
-                                            onMovieClick={handleMovieClick}
-                                            myList={myList}
-                                            onToggleMyList={handleToggleMyList}
-                                            currentUser={currentUser}
-                                        />
-                                    ))
-                                )}
-                                {isLoadingMore && <p className="text-center text-white">Loading more...</p>}
-                            </ErrorBoundary>
+                           {isLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => <CarouselSkeleton key={index} />)
+                            ) : (
+                                categories.map((category) => (
+                                    <Carousel
+                                        key={category.title}
+                                        title={category.title}
+                                        movies={category.movies}
+                                        onMovieClick={(movie) => setSelectedContent(movie)}
+                                        myList={myList}
+                                        onToggleMyList={handleToggleMyList}
+                                        currentUser={currentUser}
+                                    />
+                                ))
+                            )}
                         </div>
                     </>
                 );
         }
     };
 
+    const isFullPage = ['#/login', '#/register'].includes(currentPath) || currentPath.startsWith('#/admin');
+
     return (
-        <div className="bg-myflix-black text-white min-h-screen font-sans flex flex-col">
-            <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} route={route} siteName={siteName} isCartoonSectionEnabled={isCartoonSectionEnabled} />
-            <main className="flex-grow">
-                <ErrorBoundary>
-                    {renderPage()}
-                </ErrorBoundary>
+        <div className="bg-myflix-black min-h-screen text-white flex flex-col">
+            {!isFullPage && <Header siteName={siteName} currentUser={currentUser} onLogout={handleLogout} onBuyTokensClick={() => setShowBuyTokens(true)} isCartoonSectionEnabled={isCartoonSectionEnabled}/>}
+            <main className="flex-grow pt-16 md:pt-20">
+                 {renderPage()}
             </main>
-            {selectedMovie && <MovieDetail movie={selectedMovie} onClose={handleCloseDetail} myList={myList} onToggleMyList={handleToggleMyList} onPlay={handlePlayMovie} currentUser={currentUser} />}
-            {selectedSeries && <SeriesDetail series={selectedSeries} onClose={handleCloseDetail} onPlayEpisode={handlePlayEpisode} />}
-            {playingContent && <VideoPlayer content={playingContent} onClose={() => setPlayingContent(null)} onAdFinished={handleAdFinished} />}
-            {showTokenPrompt && <TokenPromptModal onClose={() => setShowTokenPrompt(false)} />}
-            <Footer siteName={siteName} />
+            {!isFullPage && <Footer siteName={siteName} />}
+            
+            {/* Modals */}
+            {selectedContent && 'seasons' in selectedContent ? (
+                <SeriesDetail series={selectedContent} onClose={() => setSelectedContent(null)} onPlayEpisode={handlePlay} />
+            ) : selectedContent && 'posterUrl' in selectedContent ? (
+                 <MovieDetail movie={selectedContent as Movie} onClose={() => setSelectedContent(null)} myList={myList} onToggleMyList={handleToggleMyList} onPlay={handlePlay} currentUser={currentUser} />
+            ): null}
+            
+            {playingContent && <VideoPlayer content={playingContent} onClose={() => setPlayingContent(null)} onAdFinished={(ad) => handleTokensEarned(ad.tokenReward)} />}
+            
+            {showTokenPrompt && (
+                <TokenPromptModal 
+                    movie={showTokenPrompt} 
+                    onClose={() => setShowTokenPrompt(null)}
+                    onEarnTokens={() => { closeAllModals(); window.location.hash = '#/earn-tokens'; }}
+                    onBuyTokens={() => { setShowTokenPrompt(null); setShowBuyTokens(true); }}
+                />
+            )}
+
+            {showBuyTokens && (
+                <BuyTokensModal
+                    tokenPacks={tokenPacks}
+                    onClose={() => setShowBuyTokens(false)}
+                    onPurchase={handleTokenPurchase}
+                />
+            )}
         </div>
     );
 };

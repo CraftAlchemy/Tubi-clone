@@ -275,7 +275,7 @@ const SeriesContentTable: React.FC<SeriesContentTableProps> = ({ seriesCategorie
                                     <div key={series.id} className="bg-admin-sidebar rounded-md">
                                         <div className="flex items-center p-3">
                                             <button onClick={() => toggleExpand(`${cat.title}-${series.id}`)} className="p-1 mr-2" title={expanded[`${cat.title}-${series.id}`] ? "Collapse series" : "Expand series"}><ion-icon name={expanded[`${cat.title}-${series.id}`] ? "chevron-down-outline" : "chevron-forward-outline"}></ion-icon></button>
-                                            <img src={series.posterUrl} className="w-10 h-14 object-cover rounded-sm mr-3" />
+                                            <img src={series.posterUrl} alt="" className="w-10 h-14 object-cover rounded-sm mr-3" />
                                             <span className="font-semibold flex-1">{series.title} ({series.seasons.length} seasons)</span>
                                             <div className="flex gap-2">
                                                 <button onClick={() => openModal({type: 'EDIT_SERIES', series: series, categoryTitle: cat.title})} className="text-yellow-400">Edit</button>
@@ -319,7 +319,7 @@ const SeriesContentTable: React.FC<SeriesContentTableProps> = ({ seriesCategorie
                                                                     checked={(selectedEpisodes[season.id] || []).includes(ep.id)}
                                                                     onChange={() => handleSelectEpisode(season.id, ep.id)}
                                                                 />
-                                                                <img src={ep.posterUrl} className="w-16 h-9 object-cover rounded-sm mr-3"/>
+                                                                <img src={ep.posterUrl} alt="" className="w-16 h-9 object-cover rounded-sm mr-3"/>
                                                                 <span className="text-sm flex-1">{ep.title}</span>
                                                                 <div className="flex gap-2">
                                                                     <button onClick={() => openModal({type: 'EDIT_EPISODE', episode: ep, seasonId: season.id, seriesId: series.id, categoryTitle: cat.title})} className="text-yellow-400 text-xs">Edit</button>

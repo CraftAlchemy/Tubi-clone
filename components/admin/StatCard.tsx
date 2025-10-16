@@ -1,6 +1,7 @@
 
 
 
+
 import React from 'react';
 // FIX: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
 import '../../types';
