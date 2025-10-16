@@ -6,6 +6,7 @@ declare global {
   namespace JSX {
     interface IntrinsicElements {
       // FIX: Use a more specific type for ion-icon to ensure TypeScript recognizes it across all components.
+      // By removing the generic index signature, the type becomes more specific and allows TypeScript to correctly resolve it.
       'ion-icon': {
         name?: string;
         src?: string;
@@ -13,7 +14,6 @@ declare global {
         size?: 'small' | 'large';
         class?: string;
         style?: { [key: string]: string | number };
-        [key: string]: any;
       };
     }
   }

@@ -13,9 +13,9 @@ const MOVIES_PER_PAGE = 6;
 const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate }) => {
     const [editingState, setEditingState] = useState<{ originalTitle: string; newTitle: string; } | null>(null);
     const [newCategoryTitle, setNewCategoryTitle] = useState('');
-    const [newMovie, setNewMovie] = useState<{ categoryTitle: string; title: string; posterUrl: string; videoUrl: string; trailerUrl: string; } | null>(null);
+    const [newMovie, setNewMovie] = useState<{ categoryTitle: string; title: string; posterUrl: string; videoUrl: string; trailerUrl: string; tokenCost: string; } | null>(null);
     const [editingMovie, setEditingMovie] = useState<{ movie: Movie; categoryTitle: string } | null>(null);
-    const [editFormData, setEditFormData] = useState<Partial<Movie>>({ title: '', description: '', posterUrl: '', videoUrl: '', trailerUrl: '' });
+    const [editFormData, setEditFormData] = useState<Partial<Movie>>({});
     const [dragItem, setDragItem] = useState<{ categoryIndex: number; movieIndex: number } | null>(null);
     const [currentPages, setCurrentPages] = useState<{ [categoryTitle: string]: number }>({});
     const [selectedMovies, setSelectedMovies] = useState<{ [categoryTitle: string]: number[] }>({});
@@ -59,6 +59,8 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
     const handleAddMovie = () => {
         if (!newMovie || !newMovie.title || !newMovie.posterUrl) return;
         
+        const parsedTokenCost = parseInt(newMovie.tokenCost, 10);
+
         const updatedCategories = categories.map(cat => {
             if (cat.title === newMovie.categoryTitle) {
                 const newMovieDetails: Movie = {
@@ -67,7 +69,8 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                     posterUrl: newMovie.posterUrl,
                     videoUrl: newMovie.videoUrl,
                     trailerUrl: newMovie.trailerUrl,
-                    description: 'Newly added movie description.'
+                    description: 'Newly added movie description.',
+                    tokenCost: !isNaN(parsedTokenCost) && parsedTokenCost > 0 ? parsedTokenCost : undefined,
                 };
                 return { ...cat, movies: [...cat.movies, newMovieDetails] };
             }
@@ -89,7 +92,13 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
     };
     
     const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'tokenCost') {
+            const numValue = value === '' ? undefined : parseInt(value, 10);
+            setEditFormData({ ...editFormData, [name]: isNaN(numValue!) ? undefined : numValue });
+        } else {
+            setEditFormData({ ...editFormData, [name]: value });
+        }
     };
 
     const handleUpdateMovie = () => {
@@ -230,7 +239,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                                     ) : (
                                         <>
                                             <button onClick={() => setEditingState({ originalTitle: category.title, newTitle: category.title })} className="text-yellow-400 hover:text-yellow-300">Edit</button>
-                                            <button onClick={() => setNewMovie({ categoryTitle: category.title, title: '', posterUrl: '', videoUrl: '', trailerUrl: ''})} className="text-blue-400 hover:text-blue-300">Add Movie</button>
+                                            <button onClick={() => setNewMovie({ categoryTitle: category.title, title: '', posterUrl: '', videoUrl: '', trailerUrl: '', tokenCost: ''})} className="text-blue-400 hover:text-blue-300">Add Movie</button>
                                             <button onClick={() => handleDeleteCategory(category.title)} className="text-red-400 hover:text-red-300">Delete</button>
                                         </>
                                     )}
@@ -286,6 +295,12 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                                                                             onClick={(e) => e.stopPropagation()}
                                                                         />
                                                                     </div>
+                                                                    {movie.tokenCost && (
+                                                                        <div className="absolute top-1 right-1 z-10 bg-yellow-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                                                            <ion-icon name="cash-outline" style={{'fontSize': '14px'}}></ion-icon>
+                                                                            <span>{movie.tokenCost}</span>
+                                                                        </div>
+                                                                    )}
                                                                     <img src={movie.posterUrl} alt={movie.title} className="rounded-md w-full aspect-[2/3] object-cover" />
                                                                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-70 transition-all duration-300 rounded-md">
                                                                         <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -348,6 +363,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                         <input type="text" placeholder="Poster URL" value={newMovie.posterUrl} onChange={e => setNewMovie({...newMovie, posterUrl: e.target.value})} className="bg-gray-700 rounded px-3 py-2 w-full"/>
                         <input type="text" placeholder="Video URL (e.g., YouTube)" value={newMovie.videoUrl} onChange={e => setNewMovie({...newMovie, videoUrl: e.target.value})} className="bg-gray-700 rounded px-3 py-2 w-full"/>
                         <input type="text" placeholder="Trailer URL (e.g., YouTube)" value={newMovie.trailerUrl} onChange={e => setNewMovie({...newMovie, trailerUrl: e.target.value})} className="bg-gray-700 rounded px-3 py-2 w-full"/>
+                        <input type="number" placeholder="Token Cost (optional)" value={newMovie.tokenCost} onChange={e => setNewMovie({...newMovie, tokenCost: e.target.value})} className="bg-gray-700 rounded px-3 py-2 w-full"/>
                         <div className="flex justify-end gap-4">
                             <button onClick={() => setNewMovie(null)} className="bg-gray-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
                             <button onClick={handleAddMovie} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Add</button>
@@ -375,6 +391,10 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                          <div>
                             <label className="text-sm text-gray-400">Trailer URL</label>
                             <input type="text" name="trailerUrl" value={editFormData.trailerUrl || ''} onChange={handleEditFormChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/>
+                        </div>
+                        <div>
+                            <label className="text-sm text-gray-400">Token Cost</label>
+                            <input type="number" name="tokenCost" value={editFormData.tokenCost || ''} onChange={handleEditFormChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1" placeholder="Leave empty for free"/>
                         </div>
                         <div>
                             <label className="text-sm text-gray-400">Description</label>
