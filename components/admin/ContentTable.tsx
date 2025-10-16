@@ -13,9 +13,9 @@ const MOVIES_PER_PAGE = 6;
 const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate }) => {
     const [editingState, setEditingState] = useState<{ originalTitle: string; newTitle: string; } | null>(null);
     const [newCategoryTitle, setNewCategoryTitle] = useState('');
-    const [newMovie, setNewMovie] = useState<{ categoryTitle: string; title: string; posterUrl: string } | null>(null);
+    const [newMovie, setNewMovie] = useState<{ categoryTitle: string; title: string; posterUrl: string; videoUrl: string; trailerUrl: string; } | null>(null);
     const [editingMovie, setEditingMovie] = useState<{ movie: Movie; categoryTitle: string } | null>(null);
-    const [editFormData, setEditFormData] = useState<Partial<Movie>>({ title: '', description: '', posterUrl: '' });
+    const [editFormData, setEditFormData] = useState<Partial<Movie>>({ title: '', description: '', posterUrl: '', videoUrl: '', trailerUrl: '' });
     const [dragItem, setDragItem] = useState<{ categoryIndex: number; movieIndex: number } | null>(null);
     const [currentPages, setCurrentPages] = useState<{ [categoryTitle: string]: number }>({});
 
@@ -63,6 +63,8 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                     id: Date.now(),
                     title: newMovie.title,
                     posterUrl: newMovie.posterUrl,
+                    videoUrl: newMovie.videoUrl,
+                    trailerUrl: newMovie.trailerUrl,
                     description: 'Newly added movie description.'
                 };
                 return { ...cat, movies: [...cat.movies, newMovieDetails] };
@@ -186,7 +188,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                                     ) : (
                                         <>
                                             <button onClick={() => setEditingState({ originalTitle: category.title, newTitle: category.title })} className="text-yellow-400 hover:text-yellow-300">Edit</button>
-                                            <button onClick={() => setNewMovie({ categoryTitle: category.title, title: '', posterUrl: ''})} className="text-blue-400 hover:text-blue-300">Add Movie</button>
+                                            <button onClick={() => setNewMovie({ categoryTitle: category.title, title: '', posterUrl: '', videoUrl: '', trailerUrl: ''})} className="text-blue-400 hover:text-blue-300">Add Movie</button>
                                             <button onClick={() => handleDeleteCategory(category.title)} className="text-red-400 hover:text-red-300">Delete</button>
                                         </>
                                     )}
@@ -278,6 +280,8 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                         <h3 className="text-xl font-bold">Add Movie to "{newMovie.categoryTitle}"</h3>
                         <input type="text" placeholder="Movie Title" value={newMovie.title} onChange={e => setNewMovie({...newMovie, title: e.target.value})} className="bg-gray-700 rounded px-3 py-2 w-full"/>
                         <input type="text" placeholder="Poster URL" value={newMovie.posterUrl} onChange={e => setNewMovie({...newMovie, posterUrl: e.target.value})} className="bg-gray-700 rounded px-3 py-2 w-full"/>
+                        <input type="text" placeholder="Video URL (e.g., YouTube)" value={newMovie.videoUrl} onChange={e => setNewMovie({...newMovie, videoUrl: e.target.value})} className="bg-gray-700 rounded px-3 py-2 w-full"/>
+                        <input type="text" placeholder="Trailer URL (e.g., YouTube)" value={newMovie.trailerUrl} onChange={e => setNewMovie({...newMovie, trailerUrl: e.target.value})} className="bg-gray-700 rounded px-3 py-2 w-full"/>
                         <div className="flex justify-end gap-4">
                             <button onClick={() => setNewMovie(null)} className="bg-gray-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
                             <button onClick={handleAddMovie} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Add</button>
@@ -297,6 +301,14 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                         <div>
                             <label className="text-sm text-gray-400">Poster URL</label>
                             <input type="text" name="posterUrl" value={editFormData.posterUrl} onChange={handleEditFormChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/>
+                        </div>
+                        <div>
+                            <label className="text-sm text-gray-400">Video URL</label>
+                            <input type="text" name="videoUrl" value={editFormData.videoUrl || ''} onChange={handleEditFormChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/>
+                        </div>
+                         <div>
+                            <label className="text-sm text-gray-400">Trailer URL</label>
+                            <input type="text" name="trailerUrl" value={editFormData.trailerUrl || ''} onChange={handleEditFormChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/>
                         </div>
                         <div>
                             <label className="text-sm text-gray-400">Description</label>

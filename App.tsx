@@ -7,7 +7,9 @@ import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import ProfilePage from './components/ProfilePage';
 import MovieDetail from './components/MovieDetail';
+import VideoPlayer from './components/VideoPlayer';
 import AdminDashboard from './components/admin/AdminDashboard';
+import CarouselSkeleton from './components/skeletons/CarouselSkeleton';
 import { HERO_MOVIE, generateMoreCategories, CATEGORIES } from './data/movies';
 import { USERS } from './data/users';
 import type { User, Category, Movie } from './types';
@@ -17,9 +19,11 @@ const App: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>(CATEGORIES);
     const [route, setRoute] = useState(window.location.hash);
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+    const [playingMovie, setPlayingMovie] = useState<Movie | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [myList, setMyList] = useState<number[]>([]);
 
     useEffect(() => {
@@ -28,6 +32,14 @@ const App: React.FC = () => {
         };
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+    
+    useEffect(() => {
+        // Simulate initial data loading
+        const timer = setTimeout(() => {
+            setIsInitialLoading(false);
+        }, 1500);
+        return () => clearTimeout(timer);
     }, []);
 
     const handleLogin = (email: string, password: string): boolean => {
@@ -80,6 +92,10 @@ const App: React.FC = () => {
         setSelectedMovie(movie);
     };
 
+    const handlePlayMovie = (movie: Movie) => {
+        setPlayingMovie(movie);
+    };
+
     const handleCloseDetail = () => {
         setSelectedMovie(null);
     };
@@ -105,19 +121,19 @@ const App: React.FC = () => {
     };
 
     const loadMoreCategories = useCallback(() => {
-        if (isLoading) return;
-        setIsLoading(true);
+        if (isLoadingMore) return;
+        setIsLoadingMore(true);
         setTimeout(() => { // Simulate network request
             const newCategories = generateMoreCategories(page + 1);
             setCategories(prev => [...prev, ...newCategories]);
             setPage(prev => prev + 1);
-            setIsLoading(false);
+            setIsLoadingMore(false);
         }, 500);
-    }, [page, isLoading]);
+    }, [page, isLoadingMore]);
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.innerHeight + document.documentElement.scrollTop < document.documentElement.offsetHeight - 500 || isLoading) {
+            if (window.innerHeight + document.documentElement.scrollTop < document.documentElement.offsetHeight - 500 || isLoadingMore) {
                 return;
             }
             loadMoreCategories();
@@ -125,7 +141,7 @@ const App: React.FC = () => {
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [isLoading, loadMoreCategories]);
+    }, [isLoadingMore, loadMoreCategories]);
 
     const allMovies = categories.flatMap(cat => cat.movies).concat(HERO_MOVIE);
     const uniqueMovies = Array.from(new Map(allMovies.map(m => [m.id, m])).values());
@@ -162,20 +178,24 @@ const App: React.FC = () => {
             default:
                 return (
                     <>
-                        <Hero movie={HERO_MOVIE} myList={myList} onToggleMyList={handleToggleMyList} currentUser={currentUser} />
+                        <Hero movie={HERO_MOVIE} myList={myList} onToggleMyList={handleToggleMyList} currentUser={currentUser} onPlay={handlePlayMovie} isLoading={isInitialLoading} />
                         <div className="px-4 md:px-10 lg:px-16 py-8 space-y-12">
-                            {categoriesToShow.map((category) => (
-                                <Carousel 
-                                    key={category.title} 
-                                    title={category.title} 
-                                    movies={category.movies}
-                                    onMovieClick={handleMovieClick}
-                                    myList={myList}
-                                    onToggleMyList={handleToggleMyList}
-                                    currentUser={currentUser}
-                                />
-                            ))}
-                            {isLoading && <p className="text-center text-white">Loading more...</p>}
+                            {isInitialLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => <CarouselSkeleton key={index} />)
+                            ) : (
+                                categoriesToShow.map((category) => (
+                                    <Carousel 
+                                        key={category.title} 
+                                        title={category.title} 
+                                        movies={category.movies}
+                                        onMovieClick={handleMovieClick}
+                                        myList={myList}
+                                        onToggleMyList={handleToggleMyList}
+                                        currentUser={currentUser}
+                                    />
+                                ))
+                            )}
+                            {isLoadingMore && <p className="text-center text-white">Loading more...</p>}
                         </div>
                     </>
                 );
@@ -188,7 +208,8 @@ const App: React.FC = () => {
             <main>
                 {renderPage()}
             </main>
-            {selectedMovie && <MovieDetail movie={selectedMovie} onClose={handleCloseDetail} myList={myList} onToggleMyList={handleToggleMyList} />}
+            {selectedMovie && <MovieDetail movie={selectedMovie} onClose={handleCloseDetail} myList={myList} onToggleMyList={handleToggleMyList} onPlay={handlePlayMovie} />}
+            {playingMovie && <VideoPlayer movie={playingMovie} onClose={() => setPlayingMovie(null)} />}
         </div>
     );
 };

@@ -1,15 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import type { Movie, User } from '../types';
+import HeroSkeleton from './skeletons/HeroSkeleton';
 
 interface HeroProps {
   movie: Movie;
   myList: number[];
   onToggleMyList: (movieId: number) => void;
   currentUser: User | null;
+  onPlay: (movie: Movie) => void;
+  isLoading?: boolean;
 }
 
-const Hero: React.FC<HeroProps> = ({ movie, myList, onToggleMyList, currentUser }) => {
+const Hero: React.FC<HeroProps> = ({ movie, myList, onToggleMyList, currentUser, onPlay, isLoading }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -19,6 +22,10 @@ const Hero: React.FC<HeroProps> = ({ movie, myList, onToggleMyList, currentUser 
     }, 100); 
     return () => clearTimeout(timer);
   }, []);
+  
+  if (isLoading) {
+    return <HeroSkeleton />;
+  }
 
   const isInMyList = myList.includes(movie.id);
 
@@ -41,7 +48,10 @@ const Hero: React.FC<HeroProps> = ({ movie, myList, onToggleMyList, currentUser 
             {movie.description}
           </p>
           <div className={`mt-8 flex items-center space-x-4 transition-all duration-700 ease-out delay-[400ms] ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
-            <button className="flex items-center justify-center bg-white text-black font-bold px-8 py-3 rounded-full text-lg hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">
+            <button 
+              onClick={() => onPlay(movie)}
+              className="flex items-center justify-center bg-white text-black font-bold px-8 py-3 rounded-full text-lg hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105"
+            >
               <PlayIcon />
               <span className="ml-2">Play</span>
             </button>

@@ -7,9 +7,30 @@ interface MovieDetailProps {
     onClose: () => void;
     myList: number[];
     onToggleMyList: (movieId: number) => void;
+    onPlay: (movie: Movie) => void;
 }
 
-const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onToggleMyList }) => {
+const getYoutubeVideoDetails = (url: string | undefined): { embedUrl: string; thumbnailUrl: string; } | null => {
+    if (!url) return null;
+    try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+            const videoId = urlObj.searchParams.get('v') || urlObj.pathname.split('/').pop();
+            if (videoId) {
+                return {
+                    embedUrl: `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&showinfo=0&modestbranding=1`,
+                    thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+                };
+            }
+        }
+    } catch (e) {
+        console.error("Invalid trailer URL", url);
+        return null;
+    }
+    return null;
+}
+
+const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onToggleMyList, onPlay }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [isPlayingTrailer, setIsPlayingTrailer] = useState(false);
     
@@ -27,6 +48,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onTog
     
     const description = movie.description || 'A gripping tale of adventure and mystery that will keep you on the edge of your seat. Follow our hero as they navigate a world of challenges and uncover secrets that could change everything. Perfect for a movie night.';
     const isInMyList = myList.includes(movie.id);
+    const trailerDetails = getYoutubeVideoDetails(movie.trailerUrl);
 
     return (
         <div 
@@ -68,7 +90,9 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onTog
                                 <p className="mt-4 text-sm md:text-base text-gray-300 line-clamp-4">{description}</p>
                                 
                                 <div className="mt-6 flex items-center justify-center md:justify-start space-x-4">
-                                    <button className="flex items-center justify-center bg-white text-black font-bold px-6 py-2.5 rounded-full text-base hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">
+                                    <button 
+                                        onClick={() => onPlay(movie)}
+                                        className="flex items-center justify-center bg-white text-black font-bold px-6 py-2.5 rounded-full text-base hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">
                                         <PlayIcon />
                                         <span className="ml-2">Play</span>
                                     </button>
@@ -83,36 +107,38 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onTog
                             </div>
                         </div>
                         {/* Trailer Section */}
-                        <div className="mt-8 pt-6 border-t border-gray-700">
-                            <h2 className="text-xl md:text-2xl font-bold text-white mb-4">Trailer</h2>
-                            <div className="aspect-video bg-black rounded-lg relative overflow-hidden">
-                                {!isPlayingTrailer ? (
-                                    <div 
-                                        className="w-full h-full flex items-center justify-center group cursor-pointer" 
-                                        onClick={() => setIsPlayingTrailer(true)}
-                                        title="Play trailer"
-                                    >
-                                        <img
-                                            src={`https://i.ytimg.com/vi/euz-KBBfAAo/maxresdefault.jpg`}
-                                            alt="Trailer placeholder"
-                                            className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
-                                        />
-                                        <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-10 transition-colors duration-300 flex items-center justify-center">
-                                            <PlayCircleIcon />
+                        {trailerDetails && (
+                            <div className="mt-8 pt-6 border-t border-gray-700">
+                                <h2 className="text-xl md:text-2xl font-bold text-white mb-4">Trailer</h2>
+                                <div className="aspect-video bg-black rounded-lg relative overflow-hidden">
+                                    {!isPlayingTrailer ? (
+                                        <div 
+                                            className="w-full h-full flex items-center justify-center group cursor-pointer" 
+                                            onClick={() => setIsPlayingTrailer(true)}
+                                            title="Play trailer"
+                                        >
+                                            <img
+                                                src={trailerDetails.thumbnailUrl}
+                                                alt="Trailer thumbnail"
+                                                className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
+                                            />
+                                            <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-10 transition-colors duration-300 flex items-center justify-center">
+                                                <PlayCircleIcon />
+                                            </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <iframe
-                                        className="absolute top-0 left-0 w-full h-full"
-                                        src="https://www.youtube.com/embed/euz-KBBfAAo?autoplay=1&rel=0&showinfo=0&modestbranding=1"
-                                        title="Movie Trailer"
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                    ></iframe>
-                                )}
+                                    ) : (
+                                        <iframe
+                                            className="absolute top-0 left-0 w-full h-full"
+                                            src={trailerDetails.embedUrl}
+                                            title="Movie Trailer"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        ></iframe>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
 
