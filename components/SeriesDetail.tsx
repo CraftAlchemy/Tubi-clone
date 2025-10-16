@@ -32,7 +32,7 @@ const SeriesDetail: React.FC<SeriesDetailProps> = ({ series, onClose, onPlayEpis
         >
             <div className="flex items-start justify-center min-h-screen p-4 sm:p-6 md:p-8">
                 <div 
-                    className={`relative bg-tubi-gray w-full max-w-4xl rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ease-out my-8 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                    className={`relative bg-myflix-gray w-full max-w-4xl rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ease-out my-8 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="relative h-64 md:h-80">
@@ -41,7 +41,7 @@ const SeriesDetail: React.FC<SeriesDetailProps> = ({ series, onClose, onPlayEpis
                             alt={series.title}
                             className="absolute inset-0 w-full h-full object-cover opacity-30 blur-sm scale-110"
                         />
-                         <div className="absolute inset-0 bg-gradient-to-t from-tubi-gray via-tubi-gray/70 to-transparent"></div>
+                         <div className="absolute inset-0 bg-gradient-to-t from-myflix-gray via-myflix-gray/70 to-transparent"></div>
                     </div>
 
                     <div className="p-6 md:p-8 -mt-32 md:-mt-48 relative z-10">
@@ -55,7 +55,7 @@ const SeriesDetail: React.FC<SeriesDetailProps> = ({ series, onClose, onPlayEpis
                             </div>
                             <div className="flex-1 text-center md:text-left">
                                 <h1 className="text-3xl md:text-4xl font-extrabold text-white">{series.title}</h1>
-                                <div className="mt-2 flex justify-center md:justify-start items-center space-x-4 text-sm text-tubi-light-gray">
+                                <div className="mt-2 flex justify-center md:justify-start items-center space-x-4 text-sm text-myflix-light-gray">
                                     <span>{series.seasons.length} Season{series.seasons.length > 1 ? 's' : ''}</span>
                                     <span>&bull;</span>
                                     <span className="border px-1 rounded">HD</span>
@@ -72,7 +72,7 @@ const SeriesDetail: React.FC<SeriesDetailProps> = ({ series, onClose, onPlayEpis
                                 <select 
                                     value={selectedSeasonIndex} 
                                     onChange={(e) => setSelectedSeasonIndex(Number(e.target.value))}
-                                    className="bg-tubi-black border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-tubi-red focus:border-tubi-red"
+                                    className="bg-myflix-black border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-myflix-red focus:border-myflix-red"
                                     aria-label="Select season"
                                 >
                                     {series.seasons.map((season, index) => (
@@ -83,7 +83,7 @@ const SeriesDetail: React.FC<SeriesDetailProps> = ({ series, onClose, onPlayEpis
                         </div>
                         <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-2 scrollbar-thin">
                             {selectedSeason?.episodes.map((episode, index) => (
-                                <div key={episode.id} className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-tubi-black/50 transition-colors duration-200">
+                                <div key={episode.id} className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-myflix-black/50 transition-colors duration-200">
                                     <div className="text-lg font-mono text-gray-400 w-6 text-center flex-shrink-0">{index + 1}</div>
                                     <div 
                                         className="relative w-36 h-20 rounded-md overflow-hidden flex-shrink-0 group cursor-pointer" 

@@ -1,5 +1,5 @@
 {
-  "name": "Tubi TV Clone",
-  "description": "A dynamic and visually appealing clone of the Tubi.tv streaming service interface, featuring a hero section and scrollable content carousels. This is a frontend implementation using React and Tailwind CSS with static data.",
+  "name": "Myflix",
+  "description": "A dynamic and visually appealing clone of the Myflix streaming service interface, featuring a hero section and scrollable content carousels. This is a frontend implementation using React and Tailwind CSS with static data.",
   "requestFramePermissions": []
 }

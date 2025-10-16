@@ -1,6 +1,6 @@
-# Tubi TV Clone - Production Deployment Guide
+# Myflix - Production Deployment Guide
 
-This guide provides instructions for configuring and deploying the Tubi TV Clone application to a production environment using **Google Cloud Run** and **Firestore**.
+This guide provides instructions for configuring and deploying the Myflix application to a production environment using **Google Cloud Run** and **Firestore**.
 
 ## Architecture Overview
 
@@ -48,7 +48,7 @@ To run the server locally while connected to your live Firestore database, you n
 1.  **Create a Service Account**:
     -   In the GCP console, go to "IAM & Admin" > "Service Accounts".
     -   Click **"+ Create Service Account"**.
-    -   Give it a name (e.g., `tubi-clone-server-dev`).
+    -   Give it a name (e.g., `myflix-server-dev`).
     -   Grant it the **"Cloud Datastore User"** role (this role provides permissions for Firestore).
     -   Click **"Done"**.
 
@@ -97,12 +97,12 @@ To run the server locally while connected to your live Firestore database, you n
 2.  **Deploy the Service**:
     -   Run the following command from the root of your project directory:
     ```bash
-    gcloud run deploy tubi-clone-service --source . --allow-unauthenticated
+    gcloud run deploy myflix-service --source . --allow-unauthenticated
     ```
     -   This command will:
         -   Use the Cloud Build API to build a container image from your `Dockerfile`.
         -   Push the image to the Artifact Registry.
-        -   Deploy the image to a new Cloud Run service named `tubi-clone-service`.
+        -   Deploy the image to a new Cloud Run service named `myflix-service`.
         -   The `--allow-unauthenticated` flag makes the service publicly accessible.
 
 3.  **Access Your Application**:

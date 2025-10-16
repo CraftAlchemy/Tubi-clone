@@ -61,10 +61,10 @@ export interface LiveTVChannel {
 }
 
 // Add global declaration for ion-icon to fix TypeScript errors.
-declare module 'react' {
+// Fix: Use `declare global` to augment JSX's IntrinsicElements from within a module.
+declare global {
     namespace JSX {
         interface IntrinsicElements {
-            // Fix: Use React.DetailedHTMLProps for custom elements to ensure proper merging with existing JSX types.
             'ion-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { name?: string }, HTMLElement>;
         }
     }

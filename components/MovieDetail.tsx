@@ -56,7 +56,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onTog
         >
             <div className="flex items-center justify-center min-h-screen p-4 sm:p-6 md:p-8">
                 <div 
-                    className={`relative bg-tubi-gray w-full max-w-4xl rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ease-out ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                    className={`relative bg-myflix-gray w-full max-w-4xl rounded-lg overflow-hidden shadow-2xl transition-all duration-300 ease-out ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
                     onClick={(e) => e.stopPropagation()} // Prevent closing when clicking on the modal content
                 >
                     <div className="relative h-64 md:h-96">
@@ -65,7 +65,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onTog
                             alt={movie.title}
                             className="absolute inset-0 w-full h-full object-cover opacity-30 blur-sm"
                         />
-                         <div className="absolute inset-0 bg-gradient-to-t from-tubi-gray via-tubi-gray/70 to-transparent"></div>
+                         <div className="absolute inset-0 bg-gradient-to-t from-myflix-gray via-myflix-gray/70 to-transparent"></div>
                     </div>
 
                     <div className="p-6 md:p-8 -mt-32 md:-mt-48 relative z-10">
@@ -79,7 +79,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onTog
                             </div>
                             <div className="flex-1 text-center md:text-left">
                                 <h1 className="text-3xl md:text-4xl font-extrabold text-white">{movie.title}</h1>
-                                <div className="mt-2 flex justify-center md:justify-start items-center space-x-4 text-sm text-tubi-light-gray">
+                                <div className="mt-2 flex justify-center md:justify-start items-center space-x-4 text-sm text-myflix-light-gray">
                                     <span>2024</span>
                                     <span>&bull;</span>
                                     <span>1h 58m</span>

@@ -38,14 +38,14 @@ const LiveTVPage: React.FC<LiveTVPageProps> = ({ channels }) => {
                 </div>
 
                 {/* Channel Guide */}
-                <div className="w-full lg:w-1/4 bg-tubi-gray flex-shrink-0 h-48 lg:h-full overflow-y-auto">
-                     <h2 className="text-xl font-bold p-4 bg-tubi-black sticky top-0 z-10">Channel Guide</h2>
+                <div className="w-full lg:w-1/4 bg-myflix-gray flex-shrink-0 h-48 lg:h-full overflow-y-auto">
+                     <h2 className="text-xl font-bold p-4 bg-myflix-black sticky top-0 z-10">Channel Guide</h2>
                      <div className="p-2 space-y-1">
                         {channels.map(channel => (
                             <button
                                 key={channel.id}
                                 onClick={() => setSelectedChannel(channel)}
-                                className={`w-full flex items-center p-3 rounded-md transition-colors text-left ${selectedChannel?.id === channel.id ? 'bg-admin-accent' : 'hover:bg-tubi-black/50'}`}
+                                className={`w-full flex items-center p-3 rounded-md transition-colors text-left ${selectedChannel?.id === channel.id ? 'bg-admin-accent' : 'hover:bg-myflix-black/50'}`}
                             >
                                 <img src={channel.logoUrl} alt={`${channel.name} logo`} className="w-12 h-12 rounded-full object-cover mr-4 bg-gray-700 flex-shrink-0" />
                                 <span className="font-semibold">{channel.name}</span>

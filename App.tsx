@@ -38,7 +38,7 @@ const App: React.FC = () => {
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [myList, setMyList] = useState<number[]>([]);
-    const [siteName, setSiteName] = useState('Tubi TV Clone');
+    const [siteName, setSiteName] = useState('Myflix');
     const [isCartoonSectionEnabled, setIsCartoonSectionEnabled] = useState(true);
 
     useEffect(() => {
@@ -248,7 +248,7 @@ const App: React.FC = () => {
             default:
                 return (
                     <>
-                        <ErrorBoundary fallback={<div className="h-[60vh] md:h-[85vh] w-full bg-tubi-gray flex items-center justify-center p-4 text-center"><p className="text-xl font-bold text-red-400">The hero section failed to load. Please refresh the page.</p></div>}>
+                        <ErrorBoundary fallback={<div className="h-[60vh] md:h-[85vh] w-full bg-myflix-gray flex items-center justify-center p-4 text-center"><p className="text-xl font-bold text-red-400">The hero section failed to load. Please refresh the page.</p></div>}>
                             <Hero movie={HERO_MOVIE} myList={myList} onToggleMyList={handleToggleMyList} currentUser={currentUser} onPlay={handlePlayMovie} isLoading={isInitialLoading} />
                         </ErrorBoundary>
                         <div className="px-4 md:px-10 lg:px-16 py-8 space-y-12">
@@ -277,7 +277,7 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="bg-tubi-black text-white min-h-screen font-sans">
+        <div className="bg-myflix-black text-white min-h-screen font-sans">
             <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} route={route} siteName={siteName} isCartoonSectionEnabled={isCartoonSectionEnabled} />
             <main>
                 <ErrorBoundary>

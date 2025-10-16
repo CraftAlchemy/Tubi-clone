@@ -3,13 +3,13 @@ import type { User } from '../types';
 export const USERS: User[] = [
     {
         id: 1,
-        email: 'admin@tubi.com',
+        email: 'admin@myflix.com',
         password: 'password', // In a real app, this would be hashed
         role: 'admin',
     },
     {
         id: 2,
-        email: 'user@tubi.com',
+        email: 'user@myflix.com',
         password: 'password',
         role: 'user',
     },
@@ -27,7 +27,7 @@ export const USERS: User[] = [
     },
     {
         id: 5,
-        email: 'editor@tubi.com',
+        email: 'editor@myflix.com',
         password: 'password',
         role: 'admin',
     }

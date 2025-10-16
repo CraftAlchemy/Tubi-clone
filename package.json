@@ -1,8 +1,8 @@
 
 {
-  "name": "tubi-tv-clone-production-server",
+  "name": "myflix-production-server",
   "version": "1.0.0",
-  "description": "Production backend server for the Tubi TV Clone, using Google Firestore.",
+  "description": "Production backend server for the Myflix, using Google Firestore.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

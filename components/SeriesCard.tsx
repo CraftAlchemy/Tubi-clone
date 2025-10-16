@@ -13,7 +13,7 @@ const SeriesCard: React.FC<SeriesCardProps> = ({ series, onClick }) => {
       onClick={() => onClick(series)}
     >
       <div 
-        className="relative overflow-hidden rounded-lg aspect-[2/3] bg-tubi-gray cursor-pointer"
+        className="relative overflow-hidden rounded-lg aspect-[2/3] bg-myflix-gray cursor-pointer"
       >
         <img
           src={series.posterUrl}

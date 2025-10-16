@@ -23,34 +23,34 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, categories, m
         <div className="min-h-screen pt-24 px-4 md:px-10 lg:px-16">
             <div className="max-w-4xl mx-auto">
                 <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
-                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-tubi-gray flex items-center justify-center">
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-myflix-gray flex items-center justify-center">
                         <UserIcon />
                     </div>
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold text-white text-center md:text-left">My Profile</h1>
-                        <p className="text-lg text-tubi-light-gray text-center md:text-left">{user.email}</p>
+                        <p className="text-lg text-myflix-light-gray text-center md:text-left">{user.email}</p>
                     </div>
                 </div>
                 
-                <div className="bg-tubi-gray p-6 rounded-lg">
+                <div className="bg-myflix-gray p-6 rounded-lg">
                     <h2 className="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">Account Details</h2>
                     <div className="space-y-4">
                         <div>
-                            <p className="text-sm text-tubi-light-gray">User ID</p>
+                            <p className="text-sm text-myflix-light-gray">User ID</p>
                             <p className="text-white">{user.id}</p>
                         </div>
                          <div>
-                            <p className="text-sm text-tubi-light-gray">Role</p>
+                            <p className="text-sm text-myflix-light-gray">Role</p>
                             <p className="text-white capitalize">{user.role}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-tubi-light-gray">Member Since</p>
+                            <p className="text-sm text-myflix-light-gray">Member Since</p>
                             <p className="text-white">January 2024</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-tubi-gray p-6 rounded-lg mt-8">
+                <div className="bg-myflix-gray p-6 rounded-lg mt-8">
                     <h2 className="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">My List</h2>
                     {listMovies.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -66,14 +66,14 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, categories, m
                         ))}
                         </div>
                     ) : (
-                        <p className="text-tubi-light-gray">You haven't added any movies to your list yet.</p>
+                        <p className="text-myflix-light-gray">You haven't added any movies to your list yet.</p>
                     )}
                 </div>
 
                  <div className="mt-8 flex items-center gap-4">
                      <button 
                         onClick={onLogout}
-                        className="w-auto bg-tubi-red text-white font-bold px-8 py-3 rounded-full hover:opacity-80 transition-opacity">
+                        className="w-auto bg-myflix-red text-white font-bold px-8 py-3 rounded-full hover:opacity-80 transition-opacity">
                         Sign Out
                     </button>
                     {user.role === 'admin' && (

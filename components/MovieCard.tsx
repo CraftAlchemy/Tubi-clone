@@ -18,7 +18,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, myList, onToggleM
       className="group flex-shrink-0 w-40 md:w-52 lg:w-60"
     >
       <div 
-        className="relative overflow-hidden rounded-lg aspect-[2/3] bg-tubi-gray cursor-pointer"
+        className="relative overflow-hidden rounded-lg aspect-[2/3] bg-myflix-gray cursor-pointer"
         onClick={() => onClick(movie)}
       >
         <img

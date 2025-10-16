@@ -3,9 +3,9 @@ import React from 'react';
 
 const HeroSkeleton: React.FC = () => {
   return (
-    <div className="relative h-[60vh] md:h-[85vh] w-full bg-tubi-gray animate-pulse">
-      <div className="absolute inset-0 bg-gradient-to-t from-tubi-black via-transparent to-transparent"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-tubi-black via-tubi-black/70 to-transparent"></div>
+    <div className="relative h-[60vh] md:h-[85vh] w-full bg-myflix-gray animate-pulse">
+      <div className="absolute inset-0 bg-gradient-to-t from-myflix-black via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-myflix-black via-myflix-black/70 to-transparent"></div>
       
       <div className="relative z-10 flex flex-col justify-end h-full pb-16 md:pb-24 px-4 md:px-10 lg:px-16">
         <div className="max-w-2xl space-y-4">

@@ -44,12 +44,12 @@ const MobileMenu: React.FC<{
 
     return (
         <div 
-            className="fixed inset-0 bg-tubi-black z-[100] p-4 flex flex-col animate-fade-in"
+            className="fixed inset-0 bg-myflix-black z-[100] p-4 flex flex-col animate-fade-in"
             role="dialog"
             aria-modal="true"
         >
             <div className="flex items-center justify-between flex-shrink-0">
-                <a href="/#/" onClick={onClose} title="Go to homepage" aria-label={`${siteName} Homepage`}><TubiLogo /></a>
+                <a href="/#/" onClick={onClose} title="Go to homepage" aria-label={`${siteName} Homepage`}><MyflixLogo /></a>
                 <button onClick={onClose} aria-label="Close menu" className="text-white">
                     <CloseIcon />
                 </button>
@@ -62,7 +62,7 @@ const MobileMenu: React.FC<{
                         placeholder="Search..."
                         value={searchQuery}
                         onChange={handleSearchChange}
-                        className="bg-tubi-gray border-2 border-transparent focus:border-tubi-light-gray focus:ring-0 rounded-full pl-4 pr-10 py-2 w-full text-base text-white"
+                        className="bg-myflix-gray border-2 border-transparent focus:border-myflix-light-gray focus:ring-0 rounded-full pl-4 pr-10 py-2 w-full text-base text-white"
                         aria-label="Search for content"
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -137,8 +137,8 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
         const isBrowseActive = (href === "/#/" && (route === '' || route === '#/'));
         const isActive = isBrowseActive || route === href;
 
-        const activeClasses = 'bg-tubi-gray text-white';
-        const inactiveClasses = 'text-gray-300 hover:bg-tubi-gray hover:text-white';
+        const activeClasses = 'bg-myflix-gray text-white';
+        const inactiveClasses = 'text-gray-300 hover:bg-myflix-gray hover:text-white';
         return (
             <a href={href} className={`px-3 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${isActive ? activeClasses : inactiveClasses}`} aria-label={ariaLabel}>
                 {label}
@@ -148,10 +148,10 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
 
     return (
         <>
-            <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-tubi-black bg-opacity-95' : 'bg-transparent'}`}>
+            <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-myflix-black bg-opacity-95' : 'bg-transparent'}`}>
                 <div className="flex items-center justify-between px-4 md:px-10 lg:px-16 py-4">
                     <div className="flex items-center space-x-8">
-                         <a href="/#/" title="Go to homepage" aria-label={`${siteName} Homepage`}><TubiLogo /></a>
+                         <a href="/#/" title="Go to homepage" aria-label={`${siteName} Homepage`}><MyflixLogo /></a>
                         <nav className="hidden md:flex items-center space-x-2">
                            <NavLink href="/#/" label="Browse" ariaLabel="Browse all movies and TV shows" />
                            <NavLink href="#/series" label="Series" ariaLabel="Browse TV series" />
@@ -166,7 +166,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
                                 placeholder="Search..."
                                 value={searchQuery}
                                 onChange={handleSearchChange}
-                                className="bg-tubi-gray border-2 border-transparent focus:border-tubi-light-gray focus:ring-0 rounded-full pl-4 pr-10 py-1.5 w-40 md:w-64 text-sm text-white transition-width duration-300"
+                                className="bg-myflix-gray border-2 border-transparent focus:border-myflix-light-gray focus:ring-0 rounded-full pl-4 pr-10 py-1.5 w-40 md:w-64 text-sm text-white transition-width duration-300"
                                 aria-label="Search for content"
                             />
                             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -216,18 +216,17 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
     );
 };
 
-const TubiLogo = () => (
-    <svg width="70" height="28" viewBox="0 0 94 38" fill="none" xmlns="http://www.w3.org/2000/svg" className="cursor-pointer" aria-hidden="true">
-        <path fillRule="evenodd" clipRule="evenodd" d="M12.1818 0V11.2308H6.09091V0H0V26.7692H6.09091V15.5385H12.1818V26.7692H18.2727V0H12.1818ZM38.6364 0V26.7692H44.7273V11.2308H50.8182V26.7692H56.9091V11.2308H63V26.7692H69.0909V0H38.6364ZM75.1818 0V26.7692H81.2727V0H75.1818ZM32.5455 0H22.3182C22.3182 11.2308 26.8636 15.5385 32.5455 26.7692V0Z" fill="white"/>
-        <path d="M87 0C83.6863 0 81 2.68629 81 6V32C81 35.3137 83.6863 38 87 38C90.3137 38 93 35.3137 93 32V6C93 2.68629 90.3137 0 87 0ZM87 26.2C85.2327 26.2 83.8 24.7673 83.8 23V15C83.8 13.2327 85.2327 11.8 87 11.8C88.7673 11.8 90.2 13.2327 90.2 15V23C90.2 24.7673 88.7673 26.2 87 26.2Z" fill="#F4242E"/>
-    </svg>
+const MyflixLogo = () => (
+    <span className="text-3xl font-black tracking-tighter text-myflix-red" style={{ fontFamily: 'system-ui, sans-serif' }}>
+        MYFLIX
+    </span>
 );
 
 
 const SearchIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 text-tubi-light-gray"
+        className="h-5 w-5 text-myflix-light-gray"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

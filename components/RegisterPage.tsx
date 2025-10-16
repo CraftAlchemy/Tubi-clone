@@ -26,7 +26,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
 
     return (
         <div className="min-h-screen flex items-center justify-center pt-20">
-            <div className="bg-tubi-gray p-8 rounded-lg shadow-lg w-full max-w-md">
+            <div className="bg-myflix-gray p-8 rounded-lg shadow-lg w-full max-w-md">
                 <h1 className="text-3xl font-bold text-white text-center mb-6">Create Account</h1>
                 {error && <p className="bg-red-500 text-white text-sm p-3 rounded-md mb-4">{error}</p>}
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -40,7 +40,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:outline-none focus:ring-tubi-red focus:border-tubi-red sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:outline-none focus:ring-myflix-red focus:border-myflix-red sm:text-sm"
                         />
                     </div>
                     <div>
@@ -53,7 +53,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:outline-none focus:ring-tubi-red focus:border-tubi-red sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:outline-none focus:ring-myflix-red focus:border-myflix-red sm:text-sm"
                         />
                     </div>
                     <div>
@@ -66,13 +66,13 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
                             required
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:outline-none focus:ring-tubi-red focus:border-tubi-red sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:outline-none focus:ring-myflix-red focus:border-myflix-red sm:text-sm"
                         />
                     </div>
                     <div>
                         <button
                             type="submit"
-                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-tubi-red hover:bg-tubi-red-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-tubi-gray focus:ring-tubi-red transition-colors"
+                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-myflix-red hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-myflix-gray focus:ring-myflix-red transition-colors"
                         >
                             Register
                         </button>
@@ -80,7 +80,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
                 </form>
                  <p className="mt-6 text-center text-sm text-gray-400">
                     Already have an account?{' '}
-                    <a href="#/login" className="font-medium text-tubi-red-light hover:text-tubi-red">
+                    <a href="#/login" className="font-medium text-myflix-red hover:text-myflix-red/90">
                         Sign In
                     </a>
                 </p>

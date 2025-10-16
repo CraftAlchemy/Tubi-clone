@@ -1,12 +1,12 @@
 # How to Sign In as an Administrator
 
-This document provides step-by-step instructions for logging into the Tubi TV Clone application with administrative privileges.
+This document provides step-by-step instructions for logging into the Myflix application with administrative privileges.
 
 ## Admin Credentials
 
 To access the admin dashboard, use the following pre-configured credentials which are defined in the mock user data:
 
--   **Email:** `admin@tubi.com`
+-   **Email:** `admin@myflix.com`
 -   **Password:** `password`
 
 ---
@@ -21,7 +21,7 @@ To access the admin dashboard, use the following pre-configured credentials whic
 
 3.  **Enter Credentials**:
     *   On the Sign In form, enter the admin credentials:
-    *   In the **Email** field, enter `admin@tubi.com`.
+    *   In the **Email** field, enter `admin@myflix.com`.
     *   In the **Password** field, enter `password`.
 
 4.  **Submit the Form**:
