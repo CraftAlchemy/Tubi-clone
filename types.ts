@@ -1,5 +1,5 @@
-// Fix: Use a side-effect import to ensure React's global types, including the JSX namespace, are loaded.
-import 'react';
+// Import only the necessary types to avoid conflicts with other React imports.
+import type { HTMLAttributes } from 'react';
 
 // The `declare global` block augments React's JSX types to include the custom `ion-icon` element.
 // This file is treated as a module because it contains exports, which ensures
@@ -19,6 +19,34 @@ export interface Category {
   movies: Movie[];
 }
 
+export interface Episode {
+  id: number;
+  title: string;
+  posterUrl: string;
+  description?: string;
+  videoUrl?: string;
+  duration?: string;
+}
+
+export interface Season {
+  id: number;
+  title: string;
+  episodes: Episode[];
+}
+
+export interface Series {
+  id: number;
+  title: string;
+  posterUrl: string;
+  description?: string;
+  seasons: Season[];
+}
+
+export interface SeriesCategory {
+  title: string;
+  series: Series[];
+}
+
 export interface User {
   id: number;
   email: string;
@@ -30,9 +58,8 @@ export interface User {
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            // Fix: Replaced incorrect `JSX.HTMLAttributes` with the correct `React.HTMLAttributes`
-            // to properly extend JSX typings for the custom ion-icon element.
-            'ion-icon': React.HTMLAttributes<HTMLElement> & { name?: string; };
+            // Use the directly imported HTMLAttributes type.
+            'ion-icon': HTMLAttributes<HTMLElement> & { name?: string; };
         }
     }
 }

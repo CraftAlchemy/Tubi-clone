@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import type { Movie } from '../types';
 
@@ -146,6 +145,7 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onTog
                         onClick={onClose}
                         className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-20"
                         aria-label="Close"
+                        title="Close"
                     >
                         <CloseIcon />
                     </button>

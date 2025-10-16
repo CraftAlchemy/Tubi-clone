@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import type { Movie } from '../types';
+import type { Movie, Episode } from '../types';
 
 interface VideoPlayerProps {
-    movie: Movie;
+    content: Movie | Episode;
     onClose: () => void;
 }
 
@@ -37,9 +37,9 @@ const getEmbedUrl = (url: string | undefined): string | null => {
 }
 
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ movie, onClose }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ content, onClose }) => {
     const [isLoaded, setIsLoaded] = useState(false);
-    const embedUrl = getEmbedUrl(movie.videoUrl);
+    const embedUrl = getEmbedUrl(content.videoUrl);
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -64,7 +64,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ movie, onClose }) => {
             <div className="fixed inset-0 z-[110] bg-black bg-opacity-80 flex items-center justify-center p-4" onClick={onClose}>
                 <div className="bg-tubi-gray p-8 rounded-lg text-center" onClick={(e) => e.stopPropagation()}>
                     <h2 className="text-xl text-white mb-4">Video Not Available</h2>
-                    <p className="text-tubi-light-gray">The video for "{movie.title}" could not be loaded.</p>
+                    <p className="text-tubi-light-gray">The video for "{content.title}" could not be loaded.</p>
                      <button onClick={onClose} className="mt-6 bg-tubi-red text-white font-bold px-6 py-2 rounded-full hover:opacity-80 transition-opacity">Close</button>
                 </div>
             </div>
@@ -83,7 +83,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ movie, onClose }) => {
                 <iframe
                     className="absolute top-0 left-0 w-full h-full rounded-lg"
                     src={embedUrl}
-                    title={movie.title}
+                    title={content.title}
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
@@ -92,6 +92,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ movie, onClose }) => {
                     onClick={onClose}
                     className="absolute -top-3 -right-3 md:-top-4 md:-right-4 text-white bg-tubi-gray rounded-full h-8 w-8 md:h-10 md:w-10 flex items-center justify-center hover:bg-tubi-red transition-colors z-20"
                     aria-label="Close player"
+                    title="Close player"
                 >
                     <CloseIcon />
                 </button>

@@ -1,4 +1,4 @@
-import type { Movie, Category } from '../types';
+import type { Movie, Category, Series, Season, Episode, SeriesCategory } from '../types';
 
 export const HERO_MOVIE: Movie = {
   id: 1,
@@ -69,3 +69,49 @@ export const generateMoreCategories = (page: number): Category[] => {
         };
     });
 };
+
+// --- Series Data ---
+
+const generateEpisodes = (count: number, seasonSeed: number): Episode[] => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: seasonSeed * 1000 + i,
+    title: `Episode ${i + 1}`,
+    posterUrl: `https://picsum.photos/400/225?random=${seasonSeed * 1000 + i}`,
+    description: `A pivotal moment occurs in Episode ${i + 1} that changes the course of the season.`,
+    videoUrl: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+    duration: `${Math.floor(Math.random() * 15) + 40}m`,
+  }));
+};
+
+const generateSeasons = (count: number, seriesSeed: number): Season[] => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: seriesSeed * 100 + i,
+    title: `Season ${i + 1}`,
+    episodes: generateEpisodes(8, seriesSeed * 100 + i),
+  }));
+};
+
+const generateSeries = (count: number, seed: number): Series[] => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: seed * 10000 + i,
+    title: `Epic Series Name ${seed * 10000 + i}`,
+    posterUrl: `https://picsum.photos/400/600?random=${seed * 10000 + i}`,
+    description: `An epic series about adventure, discovery, and the human spirit. Follow the journey through multiple seasons of compelling storytelling.`,
+    seasons: generateSeasons(Math.floor(Math.random() * 3) + 1, seed * 10000 + i),
+  }));
+};
+
+export const SERIES_CATEGORIES: SeriesCategory[] = [
+    {
+        title: 'Trending TV',
+        series: generateSeries(10, 1),
+    },
+    {
+        title: 'Critically Acclaimed Series',
+        series: generateSeries(10, 2),
+    },
+    {
+        title: 'Bingeworthy Dramas',
+        series: generateSeries(10, 3),
+    }
+];

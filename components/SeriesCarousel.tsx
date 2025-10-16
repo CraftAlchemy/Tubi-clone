@@ -1,17 +1,14 @@
 import React, { useRef } from 'react';
-import MovieCard from './MovieCard';
-import type { Movie, User } from '../types';
+import SeriesCard from './SeriesCard';
+import type { Series } from '../types';
 
-interface CarouselProps {
+interface SeriesCarouselProps {
   title: string;
-  movies: Movie[];
-  onMovieClick: (movie: Movie) => void;
-  myList: number[];
-  onToggleMyList: (movieId: number) => void;
-  currentUser: User | null;
+  series: Series[];
+  onSeriesClick: (series: Series) => void;
 }
 
-const Carousel: React.FC<CarouselProps> = ({ title, movies, onMovieClick, myList, onToggleMyList, currentUser }) => {
+const SeriesCarousel: React.FC<SeriesCarouselProps> = ({ title, series, onSeriesClick }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -37,14 +34,11 @@ const Carousel: React.FC<CarouselProps> = ({ title, movies, onMovieClick, myList
         ref={scrollRef}
         className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide"
       >
-        {movies.map((movie) => (
-          <MovieCard 
-            key={movie.id} 
-            movie={movie} 
-            onClick={onMovieClick} 
-            myList={myList}
-            onToggleMyList={onToggleMyList}
-            currentUser={currentUser}
+        {series.map((s) => (
+          <SeriesCard 
+            key={s.id} 
+            series={s} 
+            onClick={onSeriesClick} 
           />
         ))}
       </div>
@@ -84,4 +78,4 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
-export default Carousel;
+export default SeriesCarousel;

@@ -37,9 +37,10 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch }) => {
         <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-tubi-black bg-opacity-95' : 'bg-transparent'}`}>
             <div className="flex items-center justify-between px-4 md:px-10 lg:px-16 py-4">
                 <div className="flex items-center space-x-8">
-                     <a href="/#/"><TubiLogo /></a>
+                     <a href="/#/" title="Go to homepage"><TubiLogo /></a>
                     <nav className="hidden md:flex items-center space-x-6 text-sm font-semibold">
-                        <a href="#" className="text-white hover:text-tubi-light-gray transition-colors">Browse</a>
+                        <a href="/#/" className="text-white hover:text-tubi-light-gray transition-colors">Browse</a>
+                        <a href="#/series" className="text-white hover:text-tubi-light-gray transition-colors">Series</a>
                         <a href="#" className="text-white hover:text-tubi-light-gray transition-colors">Live TV</a>
                         <a href="#" className="text-white hover:text-tubi-light-gray transition-colors">Tubi Kids</a>
                     </nav>
@@ -59,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch }) => {
                     </div>
                     {currentUser ? (
                          <>
-                            <a href="#/profile" className="hidden md:flex items-center text-sm font-semibold border border-white px-4 py-1.5 rounded-full hover:bg-white hover:text-black transition-colors">
+                            <a href="#/profile" title="View your profile" className="hidden md:flex items-center text-sm font-semibold border border-white px-4 py-1.5 rounded-full hover:bg-white hover:text-black transition-colors">
                                 <UserIcon />
                                 <span className="ml-2">Profile</span>
                             </a>
