@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import type { User } from '../types';
 
@@ -42,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch }) => {
                     <nav className="hidden md:flex items-center space-x-6 text-sm font-semibold">
                         <a href="/#/" className="text-white hover:text-tubi-light-gray transition-colors" aria-label="Browse all movies and TV shows">Browse</a>
                         <a href="#/series" className="text-white hover:text-tubi-light-gray transition-colors" aria-label="Browse TV series">Series</a>
-                        <a href="#" className="text-white hover:text-tubi-light-gray transition-colors" aria-label="Watch live TV channels">Live TV</a>
+                        <a href="#/livetv" className="text-white hover:text-tubi-light-gray transition-colors" aria-label="Watch live TV channels">Live TV</a>
                         <a href="#" className="text-white hover:text-tubi-light-gray transition-colors" aria-label="Browse content safe for kids">Tubi Kids</a>
                     </nav>
                 </div>

@@ -4,7 +4,8 @@ import StatCard from './StatCard';
 import ContentTable from './ContentTable';
 import SeriesContentTable from './SeriesContentTable';
 import UserManagementTable from './UserManagementTable';
-import type { Category, SeriesCategory, User } from '../../types';
+import LiveTVManagementTable from './LiveTVManagementTable';
+import type { Category, SeriesCategory, User, LiveTVChannel } from '../../types';
 
 interface AdminDashboardProps {
     users: User[];
@@ -13,16 +14,19 @@ interface AdminDashboardProps {
     onContentUpdate: (categories: Category[]) => void;
     seriesCategories: SeriesCategory[];
     onSeriesContentUpdate: (seriesCategories: SeriesCategory[]) => void;
+    liveTVChannels: LiveTVChannel[];
+    onLiveTVChannelsUpdate: (channels: LiveTVChannel[]) => void;
 }
 
 type AdminView = 'dashboard' | 'content' | 'users';
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, categories, onContentUpdate, seriesCategories, onSeriesContentUpdate }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, categories, onContentUpdate, seriesCategories, onSeriesContentUpdate, liveTVChannels, onLiveTVChannelsUpdate }) => {
     const [view, setView] = useState<AdminView>('dashboard');
-    const [activeContentTab, setActiveContentTab] = useState<'movies' | 'series'>('movies');
+    const [activeContentTab, setActiveContentTab] = useState<'movies' | 'series' | 'livetv'>('movies');
     
     const totalMovies = categories.reduce((sum, cat) => sum + cat.movies.length, 0);
     const totalSeries = seriesCategories.reduce((sum, cat) => sum + cat.series.length, 0);
+    const totalChannels = liveTVChannels.length;
     const totalUsers = users.length;
 
     const renderView = () => {
@@ -34,8 +38,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, c
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                             <StatCard title="Total Movies" value={totalMovies.toString()} iconName="film-outline" />
                             <StatCard title="Total Series" value={totalSeries.toString()} iconName="tv-outline" />
+                            <StatCard title="Total Channels" value={totalChannels.toString()} iconName="radio-outline" />
                             <StatCard title="Total Users" value={totalUsers.toString()} iconName="people-outline" />
-                            <StatCard title="Revenue (Month)" value="$12,450" iconName="cash-outline" />
                         </div>
                         <div className="bg-admin-sidebar p-6 rounded-lg shadow-lg">
                             <h2 className="text-2xl font-bold text-white mb-4">Welcome, Admin!</h2>
@@ -62,14 +66,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, c
                                 >
                                     Series
                                 </button>
+                                <button
+                                    onClick={() => setActiveContentTab('livetv')}
+                                    className={`px-3 py-2 font-medium text-sm rounded-t-md ${activeContentTab === 'livetv' ? 'bg-admin-card text-white' : 'text-gray-400 hover:text-white'}`}
+                                >
+                                    Live TV
+                                </button>
                             </nav>
                          </div>
-
-                         {activeContentTab === 'movies' ? (
-                            <ContentTable categories={categories} onContentUpdate={onContentUpdate} />
-                         ) : (
-                            <SeriesContentTable seriesCategories={seriesCategories} onContentUpdate={onSeriesContentUpdate} />
-                         )}
+                        
+                        {activeContentTab === 'movies' && <ContentTable categories={categories} onContentUpdate={onContentUpdate} />}
+                        {activeContentTab === 'series' && <SeriesContentTable seriesCategories={seriesCategories} onContentUpdate={onSeriesContentUpdate} />}
+                        {activeContentTab === 'livetv' && <LiveTVManagementTable channels={liveTVChannels} onUpdate={onLiveTVChannelsUpdate} />}
                     </div>
                 );
             case 'users':

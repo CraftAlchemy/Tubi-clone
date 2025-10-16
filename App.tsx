@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -14,17 +10,19 @@ import VideoPlayer from './components/VideoPlayer';
 import AdminDashboard from './components/admin/AdminDashboard';
 import SeriesPage from './components/SeriesPage';
 import SeriesDetail from './components/SeriesDetail';
+import LiveTVPage from './components/LiveTVPage';
 import CarouselSkeleton from './components/skeletons/CarouselSkeleton';
 import ErrorBoundary from './components/ErrorBoundary';
-import { HERO_MOVIE, generateMoreCategories, CATEGORIES, SERIES_CATEGORIES } from './data/movies';
+import { HERO_MOVIE, generateMoreCategories, CATEGORIES, SERIES_CATEGORIES, LIVE_TV_CHANNELS } from './data/movies';
 import { USERS } from './data/users';
-import type { User, Category, Movie, SeriesCategory, Series, Episode } from './types';
+import type { User, Category, Movie, SeriesCategory, Series, Episode, LiveTVChannel } from './types';
 
 const App: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [users, setUsers] = useState<User[]>(USERS);
     const [categories, setCategories] = useState<Category[]>(CATEGORIES);
     const [seriesCategories, setSeriesCategories] = useState<SeriesCategory[]>(SERIES_CATEGORIES);
+    const [liveTVChannels, setLiveTVChannels] = useState<LiveTVChannel[]>(LIVE_TV_CHANNELS);
     const [route, setRoute] = useState(window.location.hash);
     
     // State for modals/details
@@ -107,6 +105,10 @@ const App: React.FC = () => {
         setSeriesCategories(updatedSeriesCategories);
     };
 
+    const handleLiveTVChannelsUpdate = (updatedChannels: LiveTVChannel[]) => {
+        setLiveTVChannels(updatedChannels);
+    };
+
     const handleUsersUpdate = (updatedUsers: User[]) => {
         setUsers(updatedUsers);
     };
@@ -152,7 +154,7 @@ const App: React.FC = () => {
     };
 
     const loadMoreCategories = useCallback(() => {
-        if (isLoadingMore || route === '#/series') return;
+        if (isLoadingMore || route === '#/series' || route === '#/livetv') return;
         setIsLoadingMore(true);
         setTimeout(() => { 
             const newCategories = generateMoreCategories(page + 1);
@@ -205,9 +207,11 @@ const App: React.FC = () => {
             case '#/profile':
                 return currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} categories={categories} myList={myList} onMovieClick={handleMovieClick} onToggleMyList={handleToggleMyList} /> : <LoginPage onLogin={handleLogin} />;
             case '#/admin':
-                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} /> : <div className="pt-24 text-center">Access Denied</div>;
+                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} liveTVChannels={liveTVChannels} onLiveTVChannelsUpdate={handleLiveTVChannelsUpdate} /> : <div className="pt-24 text-center">Access Denied</div>;
             case '#/series':
                 return <SeriesPage seriesCategories={seriesCategories} onSeriesClick={handleSeriesClick} isLoading={isInitialLoading} />;
+            case '#/livetv':
+                return <LiveTVPage channels={liveTVChannels} />;
             default:
                 return (
                     <>

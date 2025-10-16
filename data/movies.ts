@@ -1,4 +1,4 @@
-import type { Movie, Category, Series, Season, Episode, SeriesCategory } from '../types';
+import type { Movie, Category, Series, Season, Episode, SeriesCategory, LiveTVChannel } from '../types';
 
 export const HERO_MOVIE: Movie = {
   id: 1,
@@ -113,5 +113,51 @@ export const SERIES_CATEGORIES: SeriesCategory[] = [
     {
         title: 'Bingeworthy Dramas',
         series: generateSeries(10, 3),
+    }
+];
+
+// --- Live TV Data ---
+export const LIVE_TV_CHANNELS: LiveTVChannel[] = [
+    {
+        id: 1,
+        name: 'Live News',
+        logoUrl: 'https://picsum.photos/100/100?random=901',
+        streamUrl: 'https://www.youtube.com/embed/9Auq9mYxFEE?autoplay=1&mute=1' // Sky News Live
+    },
+    {
+        id: 2,
+        name: 'Music TV',
+        logoUrl: 'https://picsum.photos/100/100?random=902',
+        streamUrl: 'https://www.youtube.com/embed/Dx5qFachd3A?autoplay=1&mute=1' // Lofi Girl
+    },
+    {
+        id: 3,
+        name: 'Gaming Central',
+        logoUrl: 'https://picsum.photos/100/100?random=903',
+        streamUrl: 'https://www.youtube.com/embed/mNbnV3h_L7s?autoplay=1&mute=1' // GTV Gaming
+    },
+    {
+        id: 4,
+        name: 'Space Station Live',
+        logoUrl: 'https://picsum.photos/100/100?random=904',
+        streamUrl: 'https://www.youtube.com/embed/86YLFOog4GM?autoplay=1&mute=1' // NASA Live
+    },
+    {
+        id: 5,
+        name: 'Nature Channel',
+        logoUrl: 'https://picsum.photos/100/100?random=905',
+        streamUrl: 'https://www.youtube.com/embed/p5aA2_KlL_A?autoplay=1&mute=1' // Balmaz
+    },
+     {
+        id: 6,
+        name: 'World Events',
+        logoUrl: 'https://picsum.photos/100/100?random=906',
+        streamUrl: 'https://www.youtube.com/embed/h3MuIUNCCzI?autoplay=1&mute=1' // Al Jazeera
+    },
+     {
+        id: 7,
+        name: 'Cartoon Classics',
+        logoUrl: 'https://picsum.photos/100/100?random=907',
+        streamUrl: 'https://www.youtube.com/embed/nEjPDS8bftg?autoplay=1&mute=1' // WB Kids
     }
 ];

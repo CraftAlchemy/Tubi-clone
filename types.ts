@@ -1,6 +1,4 @@
-
-// Fix: Use a standard import to ensure React's JSX namespace is correctly augmented.
-import * as React from 'react';
+import React from 'react';
 
 // The `declare global` block augments React's JSX types to include the custom `ion-icon` element.
 // This file is treated as a module because it contains exports, which ensures
@@ -53,6 +51,13 @@ export interface User {
   email: string;
   password?: string; // Password should not be passed around
   role: 'user' | 'admin';
+}
+
+export interface LiveTVChannel {
+  id: number;
+  name: string;
+  logoUrl: string;
+  streamUrl: string;
 }
 
 // Add global declaration for ion-icon to fix TypeScript errors.
