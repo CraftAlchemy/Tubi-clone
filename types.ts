@@ -1,3 +1,6 @@
+// Fix: Add a triple-slash directive to include React's JSX type definitions, making the global JSX namespace available for augmentation.
+/// <reference types="react" />
+
 // The `declare global` block augments React's JSX types to include the custom `ion-icon` element.
 // This file is treated as a module because it contains exports, which ensures
 // that this declaration correctly merges with existing JSX definitions rather than overwriting them.

@@ -1,32 +1,41 @@
-
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { Firestore } = require('@google-cloud/firestore');
+
+// --- Firestore Initialization ---
+// The Firestore client will automatically use the credentials provided by
+// the Google Cloud environment (like Cloud Run) or from the
+// GOOGLE_APPLICATION_CREDENTIALS environment variable.
+const firestore = new Firestore();
+const contentCollection = firestore.collection('content');
+const categoriesDoc = contentCollection.doc('categories_doc');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 8080; // Use port 8080 for Cloud Run compatibility
 
-// --- In-Memory Database ---
-// This data is reset every time the server restarts.
+// --- Initial Data for Seeding ---
+const { INITIAL_CATEGORIES } = require('./data/initial-data');
 
-const generateMovies = (count, seed) => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: seed * 100 + i,
-    title: `Awesome Movie Title ${seed * 100 + i}`,
-    posterUrl: `https://picsum.photos/400/600?random=${seed * 100 + i}`,
-    description: `This is a compelling description for Awesome Movie Title ${seed * 100 + i}. It involves action, drama, and a touch of romance that will keep you hooked until the very end.`
-  }));
-};
-
-let db = {
-  categories: [
-    { title: 'Most Popular', movies: generateMovies(10, 1) },
-    { title: 'New Releases', movies: generateMovies(10, 2) },
-    { title: 'Action & Adventure', movies: generateMovies(10, 3) },
-    { title: 'Sci-Fi Universe', movies: generateMovies(10, 4) },
-    { title: 'Comedy Central', movies: generateMovies(10, 5) },
-    { title: 'Horror Flicks', movies: generateMovies(10, 6) },
-  ]
+// --- Database Seeding Function ---
+// This function checks if the database has data. If not, it populates it
+// with the initial dataset. This is crucial for the first deployment.
+const seedDatabase = async () => {
+    try {
+        const doc = await categoriesDoc.get();
+        if (!doc.exists) {
+            console.log('No content data found in Firestore. Seeding database...');
+            await categoriesDoc.set({ data: INITIAL_CATEGORIES });
+            console.log('Database seeded successfully.');
+        } else {
+            console.log('Content data found in Firestore. Skipping seed.');
+        }
+    } catch (error) {
+        console.error('Error seeding database:', error);
+        // If seeding fails, the application might not work correctly.
+        // It's important to ensure Firestore permissions are set up.
+        process.exit(1);
+    }
 };
 
 // --- Middleware ---
@@ -36,30 +45,53 @@ app.use(bodyParser.json());
 // --- API Endpoints ---
 
 // GET /api/content
-// Returns the current list of all categories and their movies.
-app.get('/api/content', (req, res) => {
-  console.log('GET /api/content - Sending content data.');
-  res.json(db.categories);
+// Returns the current list of all categories and their movies from Firestore.
+app.get('/api/content', async (req, res) => {
+    try {
+        const doc = await categoriesDoc.get();
+        if (!doc.exists) {
+            return res.status(404).json({ error: 'Content not found.' });
+        }
+        // The categories are stored in the 'data' field of the document.
+        res.json(doc.data().data);
+    } catch (error) {
+        console.error('Error fetching content:', error);
+        res.status(500).json({ error: 'Failed to fetch content.' });
+    }
 });
 
 // POST /api/content
-// Receives a new array of categories and replaces the existing data.
-app.post('/api/content', (req, res) => {
-  const updatedCategories = req.body;
-  if (!Array.isArray(updatedCategories)) {
-    console.error('POST /api/content - Invalid data format received.');
-    return res.status(400).json({ error: 'Invalid data format. Expected an array of categories.' });
-  }
-  db.categories = updatedCategories;
-  console.log('POST /api/content - Content updated successfully.');
-  res.status(200).json({ message: 'Content updated successfully.' });
+// Receives a new array of categories and replaces the existing data in Firestore.
+app.post('/api/content', async (req, res) => {
+    const updatedCategories = req.body;
+    if (!Array.isArray(updatedCategories)) {
+        console.error('POST /api/content - Invalid data format received.');
+        return res.status(400).json({ error: 'Invalid data format. Expected an array of categories.' });
+    }
+
+    try {
+        // Overwrite the document with the new array of categories.
+        await categoriesDoc.set({ data: updatedCategories });
+        console.log('POST /api/content - Content updated successfully in Firestore.');
+        res.status(200).json({ message: 'Content updated successfully.' });
+    } catch (error) {
+        console.error('Error updating content:', error);
+        res.status(500).json({ error: 'Failed to update content.' });
+    }
 });
 
 // --- Server Start ---
-app.listen(PORT, () => {
-  console.log(`
+app.listen(PORT, async () => {
+    console.log(`
     ==================================================
-    Backend server is running on http://localhost:${PORT}
+    Backend server is starting...
+    ==================================================
+  `);
+    // Seed the database before the server starts accepting requests.
+    await seedDatabase();
+    console.log(`
+    ==================================================
+    Server is running on http://localhost:${PORT}
     ==================================================
   `);
 });
