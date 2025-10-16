@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 // FIX: Add side-effect import to load global JSX augmentations for ion-icon.
 import '../../types';
@@ -135,11 +136,9 @@ const LiveTVManagementTable: React.FC<LiveTVManagementTableProps> = ({ channels,
                                 <span className="md:hidden font-semibold float-left">Actions</span>
                                 <div className="flex justify-end md:justify-start items-center gap-4">
                                     <button onClick={() => openEditModal(channel)} className="text-yellow-400 hover:text-yellow-300" title="Edit channel">
-                                        {/* @ts-ignore */}
                                         <ion-icon name="pencil-outline"></ion-icon>
                                     </button>
                                     <button onClick={() => setDeleteConfirm(channel)} className="text-red-400 hover:text-red-300" title="Delete channel">
-                                         {/* @ts-ignore */}
                                          <ion-icon name="trash-outline"></ion-icon>
                                     </button>
                                 </div>

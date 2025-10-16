@@ -1,7 +1,6 @@
 
-import React, { useState } from 'react';
-// FIX: Add side-effect import to load global JSX augmentations for ion-icon.
-import '../../types';
+import React, { useState, useEffect } from 'react';
+import '../../types'; // For ion-icon types
 import type { SeriesCategory, Series, Season, Episode } from '../../types';
 
 interface SeriesContentTableProps {
@@ -10,341 +9,241 @@ interface SeriesContentTableProps {
 }
 
 const SeriesContentTable: React.FC<SeriesContentTableProps> = ({ seriesCategories, onContentUpdate }) => {
-    const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
-    const [selectedEpisodes, setSelectedEpisodes] = useState<{ [seasonId: number]: number[] }>({});
+    const [categories, setCategories] = useState(seriesCategories);
+    const [editingCategory, setEditingCategory] = useState<SeriesCategory | null>(null);
+    const [editingSeries, setEditingSeries] = useState<{ series: Series, category: SeriesCategory } | null>(null);
+    const [managingEpisodesFor, setManagingEpisodesFor] = useState<{ series: Series, season: Season } | null>(null);
+    const [editingEpisode, setEditingEpisode] = useState<Episode | null>(null);
+    const [newCategoryTitle, setNewCategoryTitle] = useState("");
     
-    const [modal, setModal] = useState<null | 
-        { type: 'ADD_CATEGORY' } |
-        { type: 'EDIT_CATEGORY', category: SeriesCategory } |
-        { type: 'ADD_SERIES', categoryTitle: string } |
-        { type: 'EDIT_SERIES', series: Series, categoryTitle: string } |
-        { type: 'ADD_SEASON', seriesId: number, categoryTitle: string } |
-        { type: 'EDIT_SEASON', season: Season, seriesId: number, categoryTitle: string } |
-        { type: 'ADD_EPISODE', seasonId: number, seriesId: number, categoryTitle: string } |
-        { type: 'EDIT_EPISODE', episode: Episode, seasonId: number, seriesId: number, categoryTitle: string }
-    >(null);
+    useEffect(() => {
+        setCategories(seriesCategories);
+    }, [seriesCategories]);
 
-    const [formData, setFormData] = useState<any>({});
-    const [deleteConfirm, setDeleteConfirm] = useState<any>(null);
-
-    const toggleExpand = (key: string) => {
-        setExpanded(prev => ({ ...prev, [key]: !prev[key] }));
-    };
-
-    const expandAll = () => {
-        const allKeys: { [key: string]: boolean } = {};
-        seriesCategories.forEach(cat => {
-            allKeys[cat.title] = true;
-            cat.series.forEach(series => {
-                allKeys[`${cat.title}-${series.id}`] = true;
-                series.seasons.forEach(season => {
-                    allKeys[`${cat.title}-${series.id}-${season.id}`] = true;
-                });
-            });
-        });
-        setExpanded(allKeys);
-    };
-
-    const collapseAll = () => {
-        setExpanded({});
-    };
-
-    const openModal = (modalConfig: typeof modal) => {
-        setModal(modalConfig);
-        if (modalConfig) {
-            if ('category' in modalConfig) setFormData({ title: modalConfig.category.title, originalTitle: modalConfig.category.title });
-            else if ('series' in modalConfig) setFormData(modalConfig.series);
-            else if ('season' in modalConfig) setFormData(modalConfig.season);
-            else if ('episode' in modalConfig) setFormData(modalConfig.episode);
-            else setFormData({}); // Reset for add forms
-        }
-    };
-    
-    const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = () => {
-        if (!modal) return;
-        let updatedCategories = [...seriesCategories];
-
-        switch(modal.type) {
-            case 'ADD_CATEGORY':
-                updatedCategories.push({ title: formData.title, series: [] });
-                break;
-            case 'EDIT_CATEGORY':
-                updatedCategories = updatedCategories.map(c => c.title === modal.category.title ? { ...c, title: formData.title } : c);
-                break;
-            case 'ADD_SERIES':
-                updatedCategories = updatedCategories.map(c => c.title === modal.categoryTitle ? { ...c, series: [...c.series, { ...formData, id: Date.now(), seasons: [] }] } : c);
-                break;
-            case 'EDIT_SERIES':
-                 updatedCategories = updatedCategories.map(c => c.title === modal.categoryTitle ? { ...c, series: c.series.map(s => s.id === modal.series.id ? { ...s, ...formData } : s) } : c);
-                break;
-            case 'ADD_SEASON':
-                updatedCategories = updatedCategories.map(c => c.title === modal.categoryTitle ? { ...c, series: c.series.map(s => s.id === modal.seriesId ? { ...s, seasons: [...s.seasons, { ...formData, id: Date.now(), episodes: [] }] } : s) } : c);
-                break;
-            case 'EDIT_SEASON':
-                 updatedCategories = updatedCategories.map(c => c.title === modal.categoryTitle ? { ...c, series: c.series.map(s => s.id === modal.seriesId ? { ...s, seasons: s.seasons.map(se => se.id === modal.season.id ? { ...se, ...formData } : se) } : s) } : c);
-                break;
-            case 'ADD_EPISODE':
-                 updatedCategories = updatedCategories.map(c => c.title === modal.categoryTitle ? { ...c, series: c.series.map(s => s.id === modal.seriesId ? { ...s, seasons: s.seasons.map(se => se.id === modal.seasonId ? { ...se, episodes: [...se.episodes, { ...formData, id: Date.now() }] } : se) } : s) } : c);
-                break;
-            case 'EDIT_EPISODE':
-                 updatedCategories = updatedCategories.map(c => c.title === modal.categoryTitle ? { ...c, series: c.series.map(s => s.id === modal.seriesId ? { ...s, seasons: s.seasons.map(se => se.id === modal.seasonId ? { ...se, episodes: se.episodes.map(ep => ep.id === modal.episode.id ? { ...ep, ...formData } : ep) } : se) } : s) } : c);
-                break;
-        }
-        
+    const handleUpdate = (updatedCategories: SeriesCategory[]) => {
         onContentUpdate(updatedCategories);
-        setModal(null);
-        setFormData({});
-    };
-
-    const handleDelete = () => {
-        if (!deleteConfirm) return;
-        let updatedCategories;
-        switch(deleteConfirm.type) {
-            case 'CATEGORY':
-                updatedCategories = seriesCategories.filter(c => c.title !== deleteConfirm.title);
-                break;
-            case 'SERIES':
-                updatedCategories = seriesCategories.map(c => c.title === deleteConfirm.catTitle ? { ...c, series: c.series.filter(s => s.id !== deleteConfirm.id) } : c);
-                break;
-            case 'SEASON':
-                updatedCategories = seriesCategories.map(c => c.title === deleteConfirm.catTitle ? { ...c, series: c.series.map(s => s.id === deleteConfirm.seriesId ? { ...s, seasons: s.seasons.filter(se => se.id !== deleteConfirm.id) } : s) } : c);
-                break;
-            case 'EPISODE':
-                updatedCategories = seriesCategories.map(c => c.title === deleteConfirm.catTitle ? { ...c, series: c.series.map(s => s.id === deleteConfirm.seriesId ? { ...s, seasons: s.seasons.map(se => se.id === deleteConfirm.seasonId ? { ...se, episodes: se.episodes.filter(ep => ep.id !== deleteConfirm.id) } : se) } : s) } : c);
-                break;
-            default:
-                updatedCategories = seriesCategories;
-        }
-        onContentUpdate(updatedCategories);
-        setDeleteConfirm(null);
-    };
-
-    const handleSelectEpisode = (seasonId: number, episodeId: number) => {
-        setSelectedEpisodes(prev => {
-            const currentSelection = prev[seasonId] || [];
-            if (currentSelection.includes(episodeId)) {
-                return { ...prev, [seasonId]: currentSelection.filter(id => id !== episodeId) };
-            } else {
-                return { ...prev, [seasonId]: [...currentSelection, episodeId] };
-            }
-        });
-    };
-
-    const handleSelectAllEpisodes = (season: Season) => {
-        const episodeIds = season.episodes.map(ep => ep.id);
-        setSelectedEpisodes(prev => {
-            const currentSelection = prev[season.id] || [];
-            if (currentSelection.length === episodeIds.length) {
-                return { ...prev, [season.id]: [] }; // Deselect all
-            } else {
-                return { ...prev, [season.id]: episodeIds }; // Select all
-            }
-        });
     };
     
-    const handleBulkDeleteEpisodes = (catTitle: string, seriesId: number, seasonId: number) => {
-        const episodesToDelete = selectedEpisodes[seasonId] || [];
-        if (episodesToDelete.length === 0) return;
+    // Category Operations
+    const addCategory = () => {
+        if (!newCategoryTitle.trim()) return;
+        const newCategory: SeriesCategory = { title: newCategoryTitle, series: [] };
+        handleUpdate([...categories, newCategory]);
+        setNewCategoryTitle("");
+    };
 
-        const updatedCategories = seriesCategories.map(c => {
-            if (c.title === catTitle) {
-                return {
-                    ...c,
-                    series: c.series.map(s => {
-                        if (s.id === seriesId) {
-                            return {
-                                ...s,
-                                seasons: s.seasons.map(se => {
-                                    if (se.id === seasonId) {
-                                        return { ...se, episodes: se.episodes.filter(ep => !episodesToDelete.includes(ep.id)) };
-                                    }
-                                    return se;
-                                })
-                            };
-                        }
-                        return s;
-                    })
-                };
+    const deleteCategory = (category: SeriesCategory) => {
+        if(window.confirm(`Are you sure you want to delete category "${category.title}"?`)) {
+            handleUpdate(categories.filter(c => c.title !== category.title));
+        }
+    };
+    
+    // Series Operations
+    const addSeries = (category: SeriesCategory) => {
+        const newSeries: Series = {
+            id: Date.now(),
+            title: "New Series Title",
+            description: "A new series description.",
+            posterUrl: "https://picsum.photos/400/600",
+            seasons: [{ id: Date.now() + 1, title: "Season 1", episodes: [] }],
+        };
+        const updatedCategories = categories.map(c => 
+            c.title === category.title ? { ...c, series: [...c.series, newSeries] } : c
+        );
+        handleUpdate(updatedCategories);
+    };
+
+    const updateSeries = (updatedSeries: Series) => {
+        if (!editingSeries) return;
+        const updatedCategories = categories.map(c => {
+            if (c.title === editingSeries.category.title) {
+                return { ...c, series: c.series.map(s => s.id === updatedSeries.id ? updatedSeries : s) };
             }
             return c;
         });
-        onContentUpdate(updatedCategories);
-        setSelectedEpisodes(prev => ({ ...prev, [seasonId]: [] }));
-    };
-
-
-    const renderModal = () => {
-        if (!modal) return null;
-        
-        const renderFormFields = () => {
-             switch (modal.type) {
-                case 'ADD_CATEGORY':
-                case 'EDIT_CATEGORY':
-                    return <input type="text" name="title" value={formData.title || ''} onChange={handleFormChange} placeholder="Category Title" className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />;
-                case 'ADD_SERIES':
-                case 'EDIT_SERIES':
-                    return <>
-                        <input type="text" name="title" value={formData.title || ''} onChange={handleFormChange} placeholder="Series Title" className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />
-                        <input type="text" name="posterUrl" value={formData.posterUrl || ''} onChange={handleFormChange} placeholder="Poster URL" className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />
-                        <textarea name="description" value={formData.description || ''} onChange={handleFormChange} placeholder="Description" rows={3} className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />
-                    </>;
-                case 'ADD_SEASON':
-                case 'EDIT_SEASON':
-                    return <input type="text" name="title" value={formData.title || ''} onChange={handleFormChange} placeholder="Season Title (e.g., Season 1)" className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />;
-                case 'ADD_EPISODE':
-                case 'EDIT_EPISODE':
-                    return <>
-                        <input type="text" name="title" value={formData.title || ''} onChange={handleFormChange} placeholder="Episode Title" className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />
-                        <input type="text" name="posterUrl" value={formData.posterUrl || ''} onChange={handleFormChange} placeholder="Thumbnail URL" className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />
-                        <input type="text" name="videoUrl" value={formData.videoUrl || ''} onChange={handleFormChange} placeholder="Video URL" className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />
-                        <input type="text" name="duration" value={formData.duration || ''} onChange={handleFormChange} placeholder="Duration (e.g., 45m)" className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />
-                        <textarea name="description" value={formData.description || ''} onChange={handleFormChange} placeholder="Description" rows={3} className="bg-gray-700 rounded px-3 py-2 w-full mt-1" />
-                    </>;
-            }
-        };
-
-        const title = modal.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-
-        return (
-            <div className="fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4">
-                <div className="bg-admin-card p-6 rounded-lg w-full max-w-md space-y-4">
-                    <h3 className="text-xl font-bold">{title}</h3>
-                    <div className="space-y-3">{renderFormFields()}</div>
-                    <div className="flex justify-end gap-4 pt-4">
-                        <button onClick={() => setModal(null)} className="bg-gray-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
-                        <button onClick={handleSubmit} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Save</button>
-                    </div>
-                </div>
-            </div>
-        );
+        handleUpdate(updatedCategories);
     };
     
-    const renderDeleteConfirmModal = () => {
-        if (!deleteConfirm) return null;
-        return (
-            <div className="fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center p-4">
-                <div className="bg-admin-card p-6 rounded-lg w-full max-w-md space-y-4 text-center">
-                    <h3 className="text-xl font-bold text-white">Are you sure?</h3>
-                    <p className="text-gray-300">
-                        You are about to delete <span className="font-semibold text-white">{deleteConfirm.title || 'this item'}</span>. This action cannot be undone.
-                    </p>
-                    <div className="flex justify-center gap-4 pt-4">
-                        <button onClick={() => setDeleteConfirm(null)} className="bg-gray-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">
-                            Cancel
-                        </button>
-                        <button onClick={handleDelete} className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-md">
-                            Delete
-                        </button>
+    const deleteSeries = (seriesToDelete: Series, category: SeriesCategory) => {
+        if(window.confirm(`Are you sure you want to delete series "${seriesToDelete.title}"?`)) {
+            const updatedCategories = categories.map(c => 
+                c.title === category.title ? { ...c, series: c.series.filter(s => s.id !== seriesToDelete.id) } : c
+            );
+            handleUpdate(updatedCategories);
+        }
+    };
+    
+    // Season & Episode Operations
+    const addSeason = (series: Series) => {
+        const newSeason: Season = {
+            id: Date.now(),
+            title: `Season ${series.seasons.length + 1}`,
+            episodes: []
+        };
+        const updatedSeries = { ...series, seasons: [...series.seasons, newSeason] };
+        updateSeries(updatedSeries);
+    };
+    
+    const addEpisode = (season: Season, series: Series) => {
+        const newEpisode: Episode = {
+            id: Date.now(),
+            title: `Episode ${season.episodes.length + 1}`,
+            description: "New episode description.",
+            posterUrl: "https://picsum.photos/400/225",
+            videoUrl: "",
+            duration: "45m"
+        };
+        const updatedSeason = { ...season, episodes: [...season.episodes, newEpisode] };
+        const updatedSeries = { ...series, seasons: series.seasons.map(s => s.id === season.id ? updatedSeason : s) };
+        updateSeries(updatedSeries);
+        setManagingEpisodesFor({ series: updatedSeries, season: updatedSeason });
+    };
+
+    const updateEpisode = (updatedEpisode: Episode) => {
+        if (!managingEpisodesFor) return;
+        const { series, season } = managingEpisodesFor;
+        const updatedSeason = { ...season, episodes: season.episodes.map(e => e.id === updatedEpisode.id ? updatedEpisode : e) };
+        const updatedSeries = { ...series, seasons: series.seasons.map(s => s.id === season.id ? updatedSeason : s) };
+        updateSeries(updatedSeries);
+        setManagingEpisodesFor({ series: updatedSeries, season: updatedSeason });
+        setEditingEpisode(null);
+    };
+    
+    const deleteEpisode = (episode: Episode) => {
+         if (!managingEpisodesFor || !window.confirm(`Delete "${episode.title}"?`)) return;
+        const { series, season } = managingEpisodesFor;
+        const updatedSeason = { ...season, episodes: season.episodes.filter(e => e.id !== episode.id) };
+        const updatedSeries = { ...series, seasons: series.seasons.map(s => s.id === season.id ? updatedSeason : s) };
+        updateSeries(updatedSeries);
+        setManagingEpisodesFor({ series: updatedSeries, season: updatedSeason });
+    }
+
+    // Render logic
+    return (
+        <div className="space-y-6">
+            <div className="flex gap-4">
+                <input
+                    type="text"
+                    value={newCategoryTitle}
+                    onChange={(e) => setNewCategoryTitle(e.target.value)}
+                    placeholder="New series category title"
+                    className="bg-admin-card border border-gray-600 rounded-md px-3 py-2 text-white w-full md:w-1/3"
+                />
+                <button onClick={addCategory} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">
+                    Add Category
+                </button>
+            </div>
+
+            {categories.map(category => (
+                <div key={category.title} className="bg-admin-card p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-bold">{category.title}</h3>
+                        <div>
+                            <button onClick={() => addSeries(category)} className="text-blue-400 hover:text-blue-300 mr-4">Add Series</button>
+                            <button onClick={() => deleteCategory(category)} className="text-red-400 hover:text-red-300">Delete Category</button>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {category.series.map(series => (
+                            <div key={series.id} className="group relative">
+                                <img src={series.posterUrl} alt={series.title} className="rounded-md w-full aspect-[2/3] object-cover" />
+                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-70 transition-all duration-300 rounded-md">
+                                    <div className="p-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center h-full">
+                                        <button onClick={() => setEditingSeries({series, category})} className="bg-blue-600 text-white rounded-md text-xs px-2 py-1 mb-2 w-full">Edit Details</button>
+                                        <button onClick={() => addSeason(series)} className="bg-green-600 text-white rounded-md text-xs px-2 py-1 mb-2 w-full">Add Season</button>
+                                        <button onClick={() => deleteSeries(series, category)} className="bg-red-600 text-white rounded-md text-xs px-2 py-1 w-full">Delete Series</button>
+                                    </div>
+                                </div>
+                                <p className="text-xs mt-1 truncate">{series.title}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
-            </div>
-        );
+            ))}
+
+            {editingSeries && <SeriesEditModal series={editingSeries.series} onSave={updateSeries} onClose={() => setEditingSeries(null)} onManageEpisodes={setManagingEpisodesFor} />}
+            {managingEpisodesFor && <EpisodeManagementModal series={managingEpisodesFor.series} season={managingEpisodesFor.season} onAddEpisode={addEpisode} onEditEpisode={setEditingEpisode} onDeleteEpisode={deleteEpisode} onClose={() => setManagingEpisodesFor(null)}/>}
+            {editingEpisode && managingEpisodesFor && <EpisodeEditModal episode={editingEpisode} onSave={updateEpisode} onClose={() => setEditingEpisode(null)} />}
+        </div>
+    );
+};
+
+// Modals
+const SeriesEditModal: React.FC<{ series: Series, onSave: (s: Series) => void, onClose: () => void, onManageEpisodes: (data: { series: Series, season: Season }) => void }> = ({ series, onSave, onClose, onManageEpisodes }) => {
+    const [formData, setFormData] = useState(series);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({...formData, [e.target.name]: e.target.value });
+    const handleSeasonChange = (seasonId: number, newTitle: string) => {
+        setFormData({...formData, seasons: formData.seasons.map(s => s.id === seasonId ? {...s, title: newTitle} : s) });
     };
 
     return (
-        <div className="overflow-x-auto">
-            <div className="mb-6 flex gap-4">
-                 <button onClick={() => openModal({ type: 'ADD_CATEGORY' })} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">
-                    Add New Category
-                </button>
-                <button onClick={expandAll} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md">
-                    Expand All
-                </button>
-                 <button onClick={collapseAll} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md">
-                    Collapse All
-                </button>
-            </div>
-             <div className="space-y-2">
-                {seriesCategories.map(cat => (
-                    <div key={cat.title} className="bg-admin-card rounded-lg">
-                        <div className="flex items-center p-3">
-                             {/* @ts-ignore */}
-                            <button onClick={() => toggleExpand(cat.title)} className="p-1 mr-2" title={expanded[cat.title] ? "Collapse category" : "Expand category"}><ion-icon name={expanded[cat.title] ? "chevron-down-outline" : "chevron-forward-outline"}></ion-icon></button>
-                            <span className="font-bold flex-1">{cat.title} ({cat.series.length} series)</span>
-                             <div className="flex gap-2">
-                                <button onClick={() => openModal({type: 'EDIT_CATEGORY', category: cat})} className="text-yellow-400 hover:text-yellow-300">Edit</button>
-                                <button onClick={() => openModal({type: 'ADD_SERIES', categoryTitle: cat.title})} className="text-blue-400 hover:text-blue-300">Add Series</button>
-                                <button onClick={() => setDeleteConfirm({type: 'CATEGORY', title: cat.title})} className="text-red-400 hover:text-red-300">Delete</button>
-                            </div>
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+            <div className="bg-admin-card p-6 rounded-lg w-full max-w-2xl space-y-4">
+                <h3 className="text-xl font-bold">Edit Series</h3>
+                <div><label className="text-sm text-gray-400">Title</label><input type="text" name="title" value={formData.title} onChange={handleChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/></div>
+                <div><label className="text-sm text-gray-400">Poster URL</label><input type="text" name="posterUrl" value={formData.posterUrl} onChange={handleChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/></div>
+                <div><label className="text-sm text-gray-400">Description</label><textarea name="description" value={formData.description} onChange={handleChange} rows={3} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/></div>
+                <h4 className="font-bold pt-2">Seasons</h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {formData.seasons.map(season => (
+                        <div key={season.id} className="flex items-center gap-2">
+                            <input value={season.title} onChange={(e) => handleSeasonChange(season.id, e.target.value)} className="bg-gray-700 rounded px-2 py-1 w-full text-sm"/>
+                            <button onClick={() => onManageEpisodes({ series: formData, season })} className="text-sm bg-blue-600 text-white px-2 py-1 rounded-md">Episodes ({season.episodes.length})</button>
                         </div>
-                        {expanded[cat.title] && (
-                             <div className="pl-8 pr-4 pb-4 space-y-2">
-                                {cat.series.map(series => (
-                                    <div key={series.id} className="bg-admin-sidebar rounded-md">
-                                        <div className="flex items-center p-3">
-                                             {/* @ts-ignore */}
-                                            <button onClick={() => toggleExpand(`${cat.title}-${series.id}`)} className="p-1 mr-2" title={expanded[`${cat.title}-${series.id}`] ? "Collapse series" : "Expand series"}><ion-icon name={expanded[`${cat.title}-${series.id}`] ? "chevron-down-outline" : "chevron-forward-outline"}></ion-icon></button>
-                                            <img src={series.posterUrl} alt="" className="w-10 h-14 object-cover rounded-sm mr-3" />
-                                            <span className="font-semibold flex-1">{series.title} ({series.seasons.length} seasons)</span>
-                                            <div className="flex gap-2">
-                                                <button onClick={() => openModal({type: 'EDIT_SERIES', series: series, categoryTitle: cat.title})} className="text-yellow-400">Edit</button>
-                                                <button onClick={() => openModal({type: 'ADD_SEASON', seriesId: series.id, categoryTitle: cat.title})} className="text-blue-400">Add Season</button>
-                                                <button onClick={() => setDeleteConfirm({type: 'SERIES', title: series.title, id: series.id, catTitle: cat.title})} className="text-red-400">Delete</button>
-                                            </div>
-                                        </div>
-                                         {expanded[`${cat.title}-${series.id}`] && series.seasons.map(season => (
-                                            <div key={season.id} className="pl-8 pr-4 pb-2">
-                                                <div className="flex items-center p-2 bg-admin-card/50 rounded-md">
-                                                     {/* @ts-ignore */}
-                                                     <button onClick={() => toggleExpand(`${cat.title}-${series.id}-${season.id}`)} className="p-1 mr-2" title={expanded[`${cat.title}-${series.id}-${season.id}`] ? "Collapse episodes" : "Expand episodes"}><ion-icon name={expanded[`${cat.title}-${series.id}-${season.id}`] ? "chevron-down-outline" : "chevron-forward-outline"}></ion-icon></button>
-                                                     <span className="font-medium flex-1">{season.title} ({season.episodes.length} episodes)</span>
-                                                     <div className="flex gap-2">
-                                                        <button onClick={() => openModal({type: 'EDIT_SEASON', season, seriesId: series.id, categoryTitle: cat.title})} className="text-yellow-400">Edit</button>
-                                                        <button onClick={() => openModal({type: 'ADD_EPISODE', seasonId: season.id, seriesId: series.id, categoryTitle: cat.title})} className="text-blue-400">Add Episode</button>
-                                                        <button onClick={() => setDeleteConfirm({type: 'SEASON', title: season.title, id: season.id, seriesId: series.id, catTitle: cat.title})} className="text-red-400">Delete</button>
-                                                     </div>
-                                                </div>
-                                                 {expanded[`${cat.title}-${series.id}-${season.id}`] && (
-                                                    <div className="pt-2 pl-8 space-y-1">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <div className="flex items-center gap-2">
-                                                                <input type="checkbox"
-                                                                    className="form-checkbox h-4 w-4 bg-gray-700 border-gray-600 text-admin-accent rounded focus:ring-admin-accent"
-                                                                    onChange={() => handleSelectAllEpisodes(season)}
-                                                                    checked={season.episodes.length > 0 && selectedEpisodes[season.id]?.length === season.episodes.length}
-                                                                />
-                                                                <label className="text-xs">Select all</label>
-                                                            </div>
-                                                            {(selectedEpisodes[season.id] || []).length > 0 && (
-                                                                <button onClick={() => handleBulkDeleteEpisodes(cat.title, series.id, season.id)} className="bg-red-600 text-white text-xs font-bold py-1 px-3 rounded-md hover:bg-red-500">
-                                                                    Delete Selected ({(selectedEpisodes[season.id] || []).length})
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                         {season.episodes.map(ep => (
-                                                            <div key={ep.id} className="flex items-center p-1.5 rounded-md hover:bg-admin-card/30">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    className="form-checkbox h-4 w-4 bg-gray-700 border-gray-600 text-admin-accent rounded focus:ring-admin-accent mr-3"
-                                                                    checked={(selectedEpisodes[season.id] || []).includes(ep.id)}
-                                                                    onChange={() => handleSelectEpisode(season.id, ep.id)}
-                                                                />
-                                                                <img src={ep.posterUrl} alt="" className="w-16 h-9 object-cover rounded-sm mr-3"/>
-                                                                <span className="text-sm flex-1">{ep.title}</span>
-                                                                <div className="flex gap-2">
-                                                                    <button onClick={() => openModal({type: 'EDIT_EPISODE', episode: ep, seasonId: season.id, seriesId: series.id, categoryTitle: cat.title})} className="text-yellow-400 text-xs">Edit</button>
-                                                                    <button onClick={() => setDeleteConfirm({type: 'EPISODE', title: ep.title, id: ep.id, seasonId: season.id, seriesId: series.id, catTitle: cat.title})} className="text-red-400 text-xs">Delete</button>
-                                                                </div>
-                                                            </div>
-                                                         ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                         ))}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ))}
+                    ))}
+                </div>
+                <div className="flex justify-end gap-4">
+                    <button onClick={onClose} className="bg-gray-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+                    <button onClick={() => { onSave(formData); onClose(); }} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Save</button>
+                </div>
             </div>
-            
-            {renderModal()}
-            {renderDeleteConfirmModal()}
+        </div>
+    );
+};
+
+const EpisodeManagementModal: React.FC<{ series: Series, season: Season, onAddEpisode: (s: Season, se: Series) => void, onEditEpisode: (e: Episode) => void, onDeleteEpisode: (e: Episode) => void, onClose: () => void }> = ({ series, season, onAddEpisode, onEditEpisode, onDeleteEpisode, onClose }) => {
+    return (
+         <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+            <div className="bg-admin-card p-6 rounded-lg w-full max-w-3xl space-y-4">
+                 <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-bold">Manage Episodes for {season.title}</h3>
+                    <button onClick={() => onAddEpisode(season, series)} className="bg-admin-accent text-white font-bold py-1.5 px-3 rounded-md text-sm">Add Episode</button>
+                </div>
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {season.episodes.map(ep => (
+                        <div key={ep.id} className="flex items-center gap-4 bg-gray-800 p-2 rounded">
+                            <img src={ep.posterUrl} alt="" className="w-20 h-12 object-cover rounded"/>
+                            <p className="flex-1 font-semibold">{ep.title}</p>
+                            <button onClick={() => onEditEpisode(ep)} className="text-yellow-400 hover:text-yellow-300">Edit</button>
+                            <button onClick={() => onDeleteEpisode(ep)} className="text-red-400 hover:text-red-300">Delete</button>
+                        </div>
+                    ))}
+                     {season.episodes.length === 0 && <p className="text-center text-gray-400 py-4">No episodes in this season.</p>}
+                </div>
+                <div className="flex justify-end"><button onClick={onClose} className="bg-gray-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Close</button></div>
+            </div>
+        </div>
+    )
+};
+
+const EpisodeEditModal: React.FC<{ episode: Episode, onSave: (e: Episode) => void, onClose: () => void }> = ({ episode, onSave, onClose }) => {
+    const [formData, setFormData] = useState(episode);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({...formData, [e.target.name]: e.target.value });
+    
+    return (
+        <div className="fixed inset-0 z-[70] bg-black/70 flex items-center justify-center p-4">
+            <div className="bg-admin-sidebar p-6 rounded-lg w-full max-w-lg space-y-4">
+                <h3 className="text-xl font-bold">Edit Episode</h3>
+                <div><label className="text-sm">Title</label><input name="title" value={formData.title} onChange={handleChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/></div>
+                <div><label className="text-sm">Poster URL</label><input name="posterUrl" value={formData.posterUrl} onChange={handleChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/></div>
+                <div><label className="text-sm">Video URL</label><input name="videoUrl" value={formData.videoUrl} onChange={handleChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/></div>
+                <div><label className="text-sm">Duration</label><input name="duration" value={formData.duration} onChange={handleChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/></div>
+                <div><label className="text-sm">Description</label><textarea name="description" value={formData.description} onChange={handleChange} rows={2} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/></div>
+                <div className="flex justify-end gap-4">
+                    <button onClick={onClose} className="bg-gray-600 font-bold py-2 px-4 rounded-md">Cancel</button>
+                    <button onClick={() => onSave(formData)} className="bg-admin-accent font-bold py-2 px-4 rounded-md">Save</button>
+                </div>
+            </div>
         </div>
     );
 };

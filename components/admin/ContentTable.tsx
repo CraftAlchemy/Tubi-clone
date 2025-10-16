@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 // FIX: Use a side-effect import for global JSX definitions and `import type` for type-only imports.
 import '../../types';
@@ -298,7 +299,6 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                                                                     </div>
                                                                     {movie.tokenCost && (
                                                                         <div className="absolute top-1 right-1 z-10 bg-yellow-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                                                                            {/* @ts-ignore */}
                                                                             <ion-icon name="cash-outline" style={{'fontSize': '14px'}}></ion-icon>
                                                                             <span>{movie.tokenCost}</span>
                                                                         </div>
@@ -310,14 +310,12 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                                                                                 onClick={() => setEditingMovie({ movie, categoryTitle: category.title })} 
                                                                                 className="bg-blue-600 text-white rounded-full h-8 w-8 flex items-center justify-center text-lg hover:bg-blue-500 transition-colors" 
                                                                                 title="Edit movie">
-                                                                                {/* @ts-ignore */}
                                                                                 <ion-icon name="pencil-outline"></ion-icon>
                                                                             </button>
                                                                             <button 
                                                                                 onClick={() => handleDeleteMovie(category.title, movie.id)} 
                                                                                 className="bg-red-600 text-white rounded-full h-8 w-8 flex items-center justify-center text-lg hover:bg-red-500 transition-colors" 
                                                                                 title="Delete movie">
-                                                                                {/* @ts-ignore */}
                                                                                 <ion-icon name="trash-outline"></ion-icon>
                                                                             </button>
                                                                         </div>

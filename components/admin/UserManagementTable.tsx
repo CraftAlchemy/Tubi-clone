@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 // FIX: Add side-effect import to load global JSX augmentations for ion-icon.
 import '../../types';
@@ -90,7 +91,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
 
     const handleSelectAll = () => {
         const paginatedUserIds = paginatedUsers.map(u => u.id);
-        if (selectedUsers.length === paginatedUserIds.length) {
+        if (selectedUsers.length === paginatedUserIds.length && paginatedUserIds.every(id => selectedUsers.includes(id))) {
             // If all on page are selected, deselect them
             const newSelection = selectedUsers.filter(id => !paginatedUserIds.includes(id));
             setSelectedUsers(newSelection);
@@ -186,15 +187,12 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
                                 <span className="md:hidden font-semibold float-left">Actions</span>
                                 <div className="flex justify-end md:justify-start gap-4">
                                     <button onClick={() => openTokenModal(user)} className="text-green-400 hover:text-green-300" title="Add tokens">
-                                        {/* @ts-ignore */}
                                         <ion-icon name="add-circle-outline"></ion-icon>
                                     </button>
                                     <button onClick={() => openEditModal(user)} className="text-yellow-400 hover:text-yellow-300" title="Edit user">
-                                        {/* @ts-ignore */}
                                         <ion-icon name="pencil-outline"></ion-icon>
                                     </button>
                                     <button onClick={() => setDeleteConfirm(user)} className="text-red-400 hover:text-red-300" title="Delete user">
-                                         {/* @ts-ignore */}
                                          <ion-icon name="trash-outline"></ion-icon>
                                     </button>
                                 </div>

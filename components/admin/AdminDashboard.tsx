@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import StatCard from './StatCard';
@@ -10,6 +11,8 @@ import LiveTVManagementTable from './LiveTVManagementTable';
 import AdvertisementManagementTable from './AdvertisementManagementTable';
 import SettingsPage from './SettingsPage';
 
+// FIX: Import types to load global JSX augmentations for ion-icon.
+import '../../types';
 import type { User, Category, SeriesCategory, LiveTVChannel, Advertisement, TokenPack } from '../../types';
 
 interface AdminDashboardProps {
