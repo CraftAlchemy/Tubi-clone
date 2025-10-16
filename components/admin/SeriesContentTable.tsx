@@ -1,3 +1,5 @@
+// FIX: Added side-effect import for types to make ion-icon type definition available.
+import '../../types';
 import React, { useState } from 'react';
 import type { SeriesCategory, Series, Season, Episode } from '../../types';
 

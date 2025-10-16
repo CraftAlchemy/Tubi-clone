@@ -1,5 +1,5 @@
-
-
+// FIX: Added side-effect import for types to make ion-icon type definition available.
+import '../types';
 import React, { useState, useEffect } from 'react';
 import type { User } from '../types';
 

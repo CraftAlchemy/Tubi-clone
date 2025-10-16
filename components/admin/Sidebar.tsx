@@ -1,4 +1,5 @@
-// FIX: Removed redundant side-effect import for types as it is now handled globally in index.tsx.
+// FIX: Added side-effect import for types to make ion-icon type definition available.
+import '../../types';
 import React, { useState } from 'react';
 
 interface SidebarProps {
