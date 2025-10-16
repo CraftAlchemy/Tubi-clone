@@ -1,5 +1,4 @@
-
-import type React from 'react';
+import React from 'react';
 
 // The `declare global` block augments React's JSX types to include the custom `ion-icon` element.
 // This file is treated as a module because it contains exports, which ensures

@@ -1,6 +1,3 @@
-
-
-
 import React from 'react';
 // Fix: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
 import '../../types';
@@ -10,9 +7,18 @@ type AdminView = 'dashboard' | 'content' | 'users';
 interface SidebarProps {
     view: AdminView;
     setView: (view: AdminView) => void;
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ view, setView }) => {
+const Sidebar: React.FC<SidebarProps> = ({ view, setView, isOpen, setIsOpen }) => {
+    
+    const handleViewChange = (targetView: AdminView) => {
+        setView(targetView);
+        if (window.innerWidth < 1024) { // Tailwind's lg breakpoint
+            setIsOpen(false);
+        }
+    };
 
     const NavLink: React.FC<{
         targetView: AdminView;
@@ -27,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ view, setView }) => {
         
         return (
             <div title={disabled ? "Feature coming soon" : ""} className={disabled ? "cursor-not-allowed" : ""}>
-                <button onClick={() => !disabled && setView(targetView)} className={`${classes} w-full`}>
+                <button onClick={() => !disabled && handleViewChange(targetView)} className={`${classes} w-full`}>
                     <Icon name={iconName} />
                     <span className="ml-3">{label}</span>
                 </button>
@@ -36,23 +42,35 @@ const Sidebar: React.FC<SidebarProps> = ({ view, setView }) => {
     };
 
     return (
-        <aside className="w-64 bg-admin-sidebar text-gray-300 flex flex-col shadow-lg">
-            <div className="h-16 flex items-center justify-center border-b border-gray-700">
-                 <a href="#/admin" className="text-xl font-bold text-white">Admin Panel</a>
-            </div>
-            <nav className="flex-1 px-4 py-6 space-y-2">
-                <NavLink targetView="dashboard" iconName="bar-chart-outline" label="Dashboard" />
-                <NavLink targetView="content" iconName="videocam-outline" label="Content" />
-                <NavLink targetView="users" iconName="people-circle-outline" label="Users" />
-                <NavLink targetView="dashboard" iconName="settings-outline" label="Settings" disabled />
-            </nav>
-            <div className="px-4 py-6 border-t border-gray-700">
-                 <a href="/#/" className="flex items-center px-4 py-2 rounded-lg hover:bg-admin-card">
-                    <Icon name="exit-outline" />
-                    <span className="ml-3">Back to Site</span>
-                </a>
-            </div>
-        </aside>
+        <>
+             {/* Backdrop for mobile */}
+            <div 
+                className={`fixed inset-0 bg-black bg-opacity-60 z-30 transition-opacity lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                onClick={() => setIsOpen(false)}
+                aria-hidden="true"
+            ></div>
+
+            <aside className={`fixed inset-y-0 left-0 w-64 bg-admin-sidebar text-gray-300 flex flex-col shadow-lg z-40 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+                <div className="h-16 flex items-center justify-between px-4 border-b border-gray-700">
+                     <a href="#/admin" className="text-xl font-bold text-white">Admin Panel</a>
+                     <button onClick={() => setIsOpen(false)} className="lg:hidden text-gray-400 hover:text-white" aria-label="Close sidebar">
+                         <ion-icon name="close-outline" style={{ fontSize: '28px' }}></ion-icon>
+                     </button>
+                </div>
+                <nav className="flex-1 px-4 py-6 space-y-2">
+                    <NavLink targetView="dashboard" iconName="bar-chart-outline" label="Dashboard" />
+                    <NavLink targetView="content" iconName="videocam-outline" label="Content" />
+                    <NavLink targetView="users" iconName="people-circle-outline" label="Users" />
+                    <NavLink targetView="dashboard" iconName="settings-outline" label="Settings" disabled />
+                </nav>
+                <div className="px-4 py-6 border-t border-gray-700">
+                     <a href="/#/" className="flex items-center px-4 py-2 rounded-lg hover:bg-admin-card">
+                        <Icon name="exit-outline" />
+                        <span className="ml-3">Back to Site</span>
+                    </a>
+                </div>
+            </aside>
+        </>
     );
 };
 
