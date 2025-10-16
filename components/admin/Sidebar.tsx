@@ -1,4 +1,4 @@
-// FIX: Added side-effect import for types to make ion-icon type definition available.
+// FIX: Import types for ion-icon custom element.
 import '../../types';
 import React, { useState } from 'react';
 
@@ -15,7 +15,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) => {
             onClick={() => setActiveView(view)} 
             className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md transition-colors ${activeView === view ? 'bg-admin-accent text-white' : 'hover:bg-gray-700'}`}
         >
-            <ion-icon name={icon} class="text-xl"></ion-icon>
+            <ion-icon name={icon} className="text-xl"></ion-icon>
             <span className="font-medium">{label}</span>
         </button>
     );
@@ -35,7 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) => {
                     className="w-full flex items-center justify-between px-4 py-2.5 rounded-md hover:bg-gray-700"
                 >
                     <div className="flex items-center space-x-3">
-                         <ion-icon name="folder-open-outline" class="text-xl"></ion-icon>
+                         <ion-icon name="folder-open-outline" className="text-xl"></ion-icon>
                          <span className="font-medium">Content</span>
                     </div>
                     <ion-icon name={isContentMenuOpen ? "chevron-up-outline" : "chevron-down-outline"}></ion-icon>
@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) => {
             
             <div className="pt-4 mt-auto">
                  <a href="/#/" className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-md transition-colors hover:bg-gray-700">
-                    <ion-icon name="log-out-outline" class="text-xl"></ion-icon>
+                    <ion-icon name="log-out-outline" className="text-xl"></ion-icon>
                     <span className="font-medium">Exit Admin</span>
                 </a>
             </div>

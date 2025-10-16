@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { InStreamAd } from '../../types';
 
@@ -12,8 +11,8 @@ const InStreamAdManagementTable: React.FC<InStreamAdManagementTableProps> = ({ a
     return (
         <div className="bg-admin-card rounded-lg p-4">
             <p>In-Stream Ad Management Table</p>
-            <ul>
-                {ads.map(ad => <li key={ad.id}>{ad.id} - {ad.placement} ({ad.duration}s)</li>)}
+             <ul>
+                {ads.map(ad => <li key={ad.id}>{ad.id} - {ad.placement}</li>)}
             </ul>
         </div>
     );
