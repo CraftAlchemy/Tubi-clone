@@ -70,12 +70,20 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, categories, m
                     )}
                 </div>
 
-                 <div className="mt-8">
+                 <div className="mt-8 flex items-center gap-4">
                      <button 
                         onClick={onLogout}
-                        className="w-full md:w-auto bg-tubi-red text-white font-bold px-8 py-3 rounded-full hover:opacity-80 transition-opacity">
+                        className="w-auto bg-tubi-red text-white font-bold px-8 py-3 rounded-full hover:opacity-80 transition-opacity">
                         Sign Out
                     </button>
+                    {user.role === 'admin' && (
+                         <a 
+                            href="#/admin"
+                            className="w-auto bg-admin-accent text-white font-bold px-8 py-3 rounded-full hover:opacity-80 transition-opacity flex items-center gap-2">
+                            <AdminIcon />
+                            <span>Go to Admin Dashboard</span>
+                        </a>
+                    )}
                  </div>
             </div>
         </div>
@@ -89,6 +97,12 @@ const UserIcon = () => (
         viewBox="0 0 20 20" 
         fill="currentColor">
         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+    </svg>
+);
+
+const AdminIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
     </svg>
 );
 

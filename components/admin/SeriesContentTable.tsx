@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import '../../types';
 import type { SeriesCategory, Series, Season, Episode } from '../../types';
@@ -24,6 +25,24 @@ const SeriesContentTable: React.FC<SeriesContentTableProps> = ({ seriesCategorie
         setExpanded(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
+    const expandAll = () => {
+        const allKeys: { [key: string]: boolean } = {};
+        seriesCategories.forEach(cat => {
+            allKeys[cat.title] = true;
+            cat.series.forEach(series => {
+                allKeys[`${cat.title}-${series.id}`] = true;
+                series.seasons.forEach(season => {
+                    allKeys[`${cat.title}-${series.id}-${season.id}`] = true;
+                });
+            });
+        });
+        setExpanded(allKeys);
+    };
+
+    const collapseAll = () => {
+        setExpanded({});
+    };
+
     const handleUpdate = (updatedCategories: SeriesCategory[]) => {
         onContentUpdate(updatedCategories);
         setModal(null);
@@ -38,9 +57,15 @@ const SeriesContentTable: React.FC<SeriesContentTableProps> = ({ seriesCategorie
 
     return (
         <div className="overflow-x-auto">
-            <div className="mb-6">
+            <div className="mb-6 flex gap-4">
                  <button onClick={() => setModal({ type: 'ADD_CATEGORY' })} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">
                     Add New Category
+                </button>
+                <button onClick={expandAll} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md">
+                    Expand All
+                </button>
+                 <button onClick={collapseAll} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md">
+                    Collapse All
                 </button>
             </div>
              <div className="space-y-2">

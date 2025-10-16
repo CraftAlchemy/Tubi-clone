@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -12,6 +14,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import SeriesPage from './components/SeriesPage';
 import SeriesDetail from './components/SeriesDetail';
 import CarouselSkeleton from './components/skeletons/CarouselSkeleton';
+import ErrorBoundary from './components/ErrorBoundary';
 import { HERO_MOVIE, generateMoreCategories, CATEGORIES, SERIES_CATEGORIES } from './data/movies';
 import { USERS } from './data/users';
 import type { User, Category, Movie, SeriesCategory, Series, Episode } from './types';
@@ -55,8 +58,8 @@ const App: React.FC = () => {
     const handleLogin = (email: string, password: string): boolean => {
         const user = USERS.find(u => u.email === email && u.password === password);
         if (user) {
-            const userToStore = { ...user };
-            delete userToStore.password;
+            // Fix: Use object destructuring to safely remove password and maintain type correctness.
+            const { password: _password, ...userToStore } = user;
             setCurrentUser(userToStore);
             
             const storedList = localStorage.getItem(`my-list-${user.id}`);
@@ -201,24 +204,28 @@ const App: React.FC = () => {
             default:
                 return (
                     <>
-                        <Hero movie={HERO_MOVIE} myList={myList} onToggleMyList={handleToggleMyList} currentUser={currentUser} onPlay={handlePlayMovie} isLoading={isInitialLoading} />
+                        <ErrorBoundary fallback={<div className="h-[60vh] md:h-[85vh] w-full bg-tubi-gray flex items-center justify-center p-4 text-center"><p className="text-xl font-bold text-red-400">The hero section failed to load. Please refresh the page.</p></div>}>
+                            <Hero movie={HERO_MOVIE} myList={myList} onToggleMyList={handleToggleMyList} currentUser={currentUser} onPlay={handlePlayMovie} isLoading={isInitialLoading} />
+                        </ErrorBoundary>
                         <div className="px-4 md:px-10 lg:px-16 py-8 space-y-12">
-                            {isInitialLoading ? (
-                                Array.from({ length: 5 }).map((_, index) => <CarouselSkeleton key={index} />)
-                            ) : (
-                                categoriesToShow.map((category) => (
-                                    <Carousel 
-                                        key={category.title} 
-                                        title={category.title} 
-                                        movies={category.movies}
-                                        onMovieClick={handleMovieClick}
-                                        myList={myList}
-                                        onToggleMyList={handleToggleMyList}
-                                        currentUser={currentUser}
-                                    />
-                                ))
-                            )}
-                            {isLoadingMore && <p className="text-center text-white">Loading more...</p>}
+                             <ErrorBoundary>
+                                {isInitialLoading ? (
+                                    Array.from({ length: 5 }).map((_, index) => <CarouselSkeleton key={index} />)
+                                ) : (
+                                    categoriesToShow.map((category) => (
+                                        <Carousel 
+                                            key={category.title} 
+                                            title={category.title} 
+                                            movies={category.movies}
+                                            onMovieClick={handleMovieClick}
+                                            myList={myList}
+                                            onToggleMyList={handleToggleMyList}
+                                            currentUser={currentUser}
+                                        />
+                                    ))
+                                )}
+                                {isLoadingMore && <p className="text-center text-white">Loading more...</p>}
+                            </ErrorBoundary>
                         </div>
                     </>
                 );
@@ -229,7 +236,9 @@ const App: React.FC = () => {
         <div className="bg-tubi-black text-white min-h-screen font-sans">
             <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} />
             <main>
-                {renderPage()}
+                <ErrorBoundary>
+                    {renderPage()}
+                </ErrorBoundary>
             </main>
             {selectedMovie && <MovieDetail movie={selectedMovie} onClose={handleCloseDetail} myList={myList} onToggleMyList={handleToggleMyList} onPlay={handlePlayMovie} />}
             {selectedSeries && <SeriesDetail series={selectedSeries} onClose={handleCloseDetail} onPlayEpisode={handlePlayEpisode} />}

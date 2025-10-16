@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import type { Series, Episode } from '../types';
 
@@ -84,7 +85,11 @@ const SeriesDetail: React.FC<SeriesDetailProps> = ({ series, onClose, onPlayEpis
                             {selectedSeason?.episodes.map((episode, index) => (
                                 <div key={episode.id} className="flex items-center gap-4 p-2.5 rounded-lg hover:bg-tubi-black/50 transition-colors duration-200">
                                     <div className="text-lg font-mono text-gray-400 w-6 text-center flex-shrink-0">{index + 1}</div>
-                                    <div className="relative w-36 h-20 rounded-md overflow-hidden flex-shrink-0 group cursor-pointer" onClick={() => onPlayEpisode(episode)}>
+                                    <div 
+                                        className="relative w-36 h-20 rounded-md overflow-hidden flex-shrink-0 group cursor-pointer" 
+                                        onClick={() => onPlayEpisode(episode)}
+                                        title="Play episode"
+                                    >
                                         <img src={episode.posterUrl} alt={episode.title} className="w-full h-full object-cover" />
                                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
                                             <PlayCircleIcon small />

@@ -1,5 +1,5 @@
-// Import only the necessary types to avoid conflicts with other React imports.
-import type { HTMLAttributes } from 'react';
+// Fix: Changed to a full React import to ensure JSX namespace is correctly augmented.
+import * as React from 'react';
 
 // The `declare global` block augments React's JSX types to include the custom `ion-icon` element.
 // This file is treated as a module because it contains exports, which ensures
@@ -58,8 +58,8 @@ export interface User {
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            // Use the directly imported HTMLAttributes type.
-            'ion-icon': HTMLAttributes<HTMLElement> & { name?: string; };
+            // Fix: Use React.HTMLAttributes to correctly reference React's types.
+            'ion-icon': React.HTMLAttributes<HTMLElement> & { name?: string; };
         }
     }
 }
