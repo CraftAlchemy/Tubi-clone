@@ -1,7 +1,8 @@
 
 
+
 import React, { useState } from 'react';
-// Fix: Add side-effect import to load global JSX augmentations for ion-icon.
+// FIX: Add side-effect import to load global JSX augmentations for ion-icon.
 import '../../types';
 import Sidebar from './Sidebar';
 import StatCard from './StatCard';
@@ -9,8 +10,9 @@ import ContentTable from './ContentTable';
 import SeriesContentTable from './SeriesContentTable';
 import UserManagementTable from './UserManagementTable';
 import LiveTVManagementTable from './LiveTVManagementTable';
+import AdvertisementManagementTable from './AdvertisementManagementTable';
 import SettingsPage from './SettingsPage';
-import type { Category, SeriesCategory, User, LiveTVChannel } from '../../types';
+import type { Category, SeriesCategory, User, LiveTVChannel, Advertisement } from '../../types';
 
 interface AdminDashboardProps {
     users: User[];
@@ -21,13 +23,15 @@ interface AdminDashboardProps {
     onSeriesContentUpdate: (seriesCategories: SeriesCategory[]) => void;
     liveTVChannels: LiveTVChannel[];
     onLiveTVChannelsUpdate: (channels: LiveTVChannel[]) => void;
+    advertisements: Advertisement[];
+    onAdvertisementsUpdate: (ads: Advertisement[]) => void;
     siteName: string;
     onSiteNameUpdate: (newName: string) => void;
     isCartoonSectionEnabled: boolean;
     onToggleCartoonSection: (isEnabled: boolean) => void;
 }
 
-type AdminView = 'dashboard' | 'content' | 'users' | 'settings';
+type AdminView = 'dashboard' | 'content' | 'users' | 'monetization' | 'settings';
 
 const AdminMobileHeader: React.FC<{ onMenuClick: () => void; siteName: string }> = ({ onMenuClick, siteName }) => (
     <div className="lg:hidden flex items-center justify-between mb-6 bg-admin-sidebar p-3 rounded-lg shadow-md">
@@ -39,14 +43,15 @@ const AdminMobileHeader: React.FC<{ onMenuClick: () => void; siteName: string }>
 );
 
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, categories, onContentUpdate, seriesCategories, onSeriesContentUpdate, liveTVChannels, onLiveTVChannelsUpdate, siteName, onSiteNameUpdate, isCartoonSectionEnabled, onToggleCartoonSection }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
+    const { users, onUsersUpdate, categories, onContentUpdate, seriesCategories, onSeriesContentUpdate, liveTVChannels, onLiveTVChannelsUpdate, advertisements, onAdvertisementsUpdate, siteName, onSiteNameUpdate, isCartoonSectionEnabled, onToggleCartoonSection } = props;
     const [view, setView] = useState<AdminView>('dashboard');
     const [activeContentTab, setActiveContentTab] = useState<'movies' | 'series' | 'livetv'>('movies');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     
     const totalMovies = categories.reduce((sum, cat) => sum + cat.movies.length, 0);
     const totalSeries = seriesCategories.reduce((sum, cat) => sum + cat.series.length, 0);
-    const totalChannels = liveTVChannels.length;
+    const totalAds = advertisements.length;
     const totalUsers = users.length;
 
     const renderView = () => {
@@ -58,7 +63,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, c
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                             <StatCard title="Total Movies" value={totalMovies.toString()} iconName="film-outline" />
                             <StatCard title="Total Series" value={totalSeries.toString()} iconName="tv-outline" />
-                            <StatCard title="Total Channels" value={totalChannels.toString()} iconName="radio-outline" />
+                            <StatCard title="Total Ads" value={totalAds.toString()} iconName="cash-outline" />
                             <StatCard title="Total Users" value={totalUsers.toString()} iconName="people-outline" />
                         </div>
                         <div className="bg-admin-sidebar p-6 rounded-lg shadow-lg">
@@ -106,6 +111,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, c
                         <h2 className="text-2xl font-bold text-white mb-6">User Management</h2>
                         <UserManagementTable users={users} onUpdate={onUsersUpdate} />
                      </div>
+                );
+            case 'monetization':
+                return (
+                    <div className="bg-admin-sidebar p-6 rounded-lg shadow-lg">
+                        <h2 className="text-2xl font-bold text-white mb-6">Monetization</h2>
+                        <AdvertisementManagementTable advertisements={advertisements} onUpdate={onAdvertisementsUpdate} />
+                    </div>
                 );
             case 'settings':
                 return <SettingsPage siteName={siteName} onSiteNameUpdate={onSiteNameUpdate} isCartoonSectionEnabled={isCartoonSectionEnabled} onToggleCartoonSection={onToggleCartoonSection} />;

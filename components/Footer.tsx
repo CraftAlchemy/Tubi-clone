@@ -1,4 +1,7 @@
+
+
 import React from 'react';
+// FIX: Add side-effect import to load global JSX augmentations for ion-icon.
 import '../types';
 
 interface FooterProps {
@@ -9,7 +12,7 @@ const Footer: React.FC<FooterProps> = ({ siteName }) => {
     const year = new Date().getFullYear();
     
     return (
-        <footer className="bg-myflix-black border-t border-gray-800 mt-auto py-8 px-4 md:px-10 lg:px-16 text-myflix-light-gray text-sm">
+        <footer className="bg-myflix-black border-t border-gray-800 mt-auto py-8 px-4 sm:px-6 md:px-8 lg:px-16 text-myflix-light-gray text-sm">
             <div className="max-w-7xl mx-auto">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
                     <div className="space-y-3">

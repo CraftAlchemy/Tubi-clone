@@ -1,9 +1,10 @@
 
+
 import React from 'react';
-// Fix: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
+// FIX: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
 import '../../types';
 
-type AdminView = 'dashboard' | 'content' | 'users' | 'settings';
+type AdminView = 'dashboard' | 'content' | 'users' | 'monetization' | 'settings';
 
 interface SidebarProps {
     view: AdminView;
@@ -63,6 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({ view, setView, isOpen, setIsOpen, sit
                     <NavLink targetView="dashboard" iconName="bar-chart-outline" label="Dashboard" />
                     <NavLink targetView="content" iconName="videocam-outline" label="Content" />
                     <NavLink targetView="users" iconName="people-circle-outline" label="Users" />
+                    <NavLink targetView="monetization" iconName="cash-outline" label="Monetization" />
                     <NavLink targetView="settings" iconName="settings-outline" label="Settings" />
                 </nav>
                 <div className="px-4 py-6 border-t border-gray-700">

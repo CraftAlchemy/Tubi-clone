@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Carousel from './Carousel';
 import CarouselSkeleton from './skeletons/CarouselSkeleton';
@@ -16,7 +17,7 @@ interface CartoonPageProps {
 const CartoonPage: React.FC<CartoonPageProps> = ({ categories, onMovieClick, myList, onToggleMyList, currentUser, isLoading }) => {
     return (
         <div className="pt-24">
-            <div className="px-4 md:px-10 lg:px-16 py-8">
+            <div className="px-4 sm:px-6 md:px-8 lg:px-16 py-8">
                 <h1 className="text-4xl font-bold mb-8 text-white tracking-tighter">Cartoons</h1>
                  <div className="space-y-12">
                     <ErrorBoundary>

@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import type { Movie } from '../types';
+import type { Movie, User } from '../types';
 
 interface MovieDetailProps {
     movie: Movie;
@@ -7,6 +8,7 @@ interface MovieDetailProps {
     myList: number[];
     onToggleMyList: (movieId: number) => void;
     onPlay: (movie: Movie) => void;
+    currentUser: User | null;
 }
 
 const getYoutubeVideoDetails = (url: string | undefined): { embedUrl: string; thumbnailUrl: string; } | null => {
@@ -29,7 +31,7 @@ const getYoutubeVideoDetails = (url: string | undefined): { embedUrl: string; th
     return null;
 }
 
-const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onToggleMyList, onPlay }) => {
+const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onToggleMyList, onPlay, currentUser }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [isPlayingTrailer, setIsPlayingTrailer] = useState(false);
     
@@ -48,6 +50,8 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onTog
     const description = movie.description || 'A gripping tale of adventure and mystery that will keep you on the edge of your seat. Follow our hero as they navigate a world of challenges and uncover secrets that could change everything. Perfect for a movie night.';
     const isInMyList = myList.includes(movie.id);
     const trailerDetails = getYoutubeVideoDetails(movie.trailerUrl);
+    const tokenCost = movie.tokenCost;
+    const hasEnoughTokens = !tokenCost || (currentUser && currentUser.tokens >= tokenCost);
 
     return (
         <div 
@@ -86,22 +90,36 @@ const MovieDetail: React.FC<MovieDetailProps> = ({ movie, onClose, myList, onTog
                                     <span>&bull;</span>
                                     <span className="border px-1 rounded">HD</span>
                                 </div>
-                                <p className="mt-4 text-sm md:text-base text-gray-300 line-clamp-4">{description}</p>
+                                <p className="mt-4 text-sm md:text-base text-gray-300 line-clamp-3 sm:line-clamp-none">{description}</p>
                                 
-                                <div className="mt-6 flex items-center justify-center md:justify-start space-x-4">
-                                    <button 
-                                        onClick={() => onPlay(movie)}
-                                        className="flex items-center justify-center bg-white text-black font-bold px-6 py-2.5 rounded-full text-base hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105">
-                                        <PlayIcon />
-                                        <span className="ml-2">Play</span>
-                                    </button>
-                                    <button 
-                                        onClick={() => onToggleMyList(movie.id)}
-                                        className="flex items-center justify-center bg-gray-500 bg-opacity-40 text-white font-bold p-3 rounded-full hover:bg-opacity-60 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
-                                        title={isInMyList ? 'Remove from My List' : 'Add to My List'}
-                                    >
-                                        {isInMyList ? <CheckIcon /> : <PlusIcon />}
-                                    </button>
+                                <div className="mt-6 flex flex-col items-center md:items-start">
+                                    <div className="flex items-center justify-center md:justify-start space-x-4">
+                                        <button 
+                                            onClick={() => onPlay(movie)}
+                                            className="flex items-center justify-center bg-white text-black font-bold px-6 py-2.5 rounded-full text-base hover:bg-opacity-80 transition-all duration-300 transform hover:scale-105"
+                                            disabled={!currentUser}
+                                            title={!currentUser ? "Please sign in to play" : ""}
+                                        >
+                                            <PlayIcon />
+                                            <span className="ml-2">
+                                                {tokenCost ? `Play (${tokenCost} ${tokenCost > 1 ? 'Tokens' : 'Token'})` : 'Play'}
+                                            </span>
+                                        </button>
+                                        {currentUser && (
+                                            <button 
+                                                onClick={() => onToggleMyList(movie.id)}
+                                                className="flex items-center justify-center bg-gray-500 bg-opacity-40 text-white font-bold p-3 rounded-full hover:bg-opacity-60 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+                                                title={isInMyList ? 'Remove from My List' : 'Add to My List'}
+                                            >
+                                                {isInMyList ? <CheckIcon /> : <PlusIcon />}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {!hasEnoughTokens && currentUser && (
+                                         <div className="mt-3 text-center md:text-left text-sm text-red-400 bg-red-900/30 p-2 rounded-md">
+                                            Not enough tokens. <a href="#/earn-tokens" onClick={onClose} className="font-bold underline hover:text-red-300">Earn more here.</a>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

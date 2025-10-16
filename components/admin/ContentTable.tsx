@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// Fix: Use a side-effect import for global JSX definitions and `import type` for type-only imports.
+// FIX: Use a side-effect import for global JSX definitions and `import type` for type-only imports.
 import '../../types';
 import type { Category, Movie } from '../../types';
 

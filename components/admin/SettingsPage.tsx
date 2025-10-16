@@ -11,9 +11,12 @@ interface SettingsPageProps {
 const SettingsPage: React.FC<SettingsPageProps> = ({ siteName, onSiteNameUpdate, isCartoonSectionEnabled, onToggleCartoonSection }) => {
     const [name, setName] = useState(siteName);
     const [isSaved, setIsSaved] = useState(false);
+    // Dummy state for monetization setting example
+    const [defaultTokenReward, setDefaultTokenReward] = useState(1);
 
     const handleSave = () => {
         onSiteNameUpdate(name);
+        // Here you would also save monetization settings
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 2000); // Hide message after 2 seconds
     };
@@ -52,6 +55,25 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ siteName, onSiteNameUpdate,
                     >
                         Save Changes
                     </button>
+                 </div>
+            </div>
+
+            <div className="bg-admin-sidebar p-6 rounded-lg shadow-lg max-w-2xl mt-8">
+                 <h2 className="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-4">Monetization Settings</h2>
+                 <div className="space-y-4">
+                    <div>
+                        <label htmlFor="defaultTokenReward" className="block text-sm font-medium text-gray-300 mb-1">
+                           Default Token Reward per Ad
+                        </label>
+                        <input
+                            type="number"
+                            id="defaultTokenReward"
+                            value={defaultTokenReward}
+                            onChange={(e) => setDefaultTokenReward(parseInt(e.target.value, 10) || 0)}
+                            className="bg-admin-card border border-gray-600 rounded-md px-3 py-2 text-white w-full focus:ring-admin-accent focus:border-admin-accent"
+                        />
+                         <p className="text-xs text-gray-400 mt-2">The default number of tokens a user receives for watching one advertisement.</p>
+                    </div>
                  </div>
             </div>
 

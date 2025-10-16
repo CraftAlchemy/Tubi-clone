@@ -1,7 +1,8 @@
 
 
+
 import React from 'react';
-// Fix: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
+// FIX: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
 import '../../types';
 
 interface StatCardProps {

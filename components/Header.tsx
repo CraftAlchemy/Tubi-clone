@@ -75,6 +75,7 @@ const MobileMenu: React.FC<{
                      <a href="#/series" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Series</a>
                      <a href="#/livetv" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Live TV</a>
                      {isCartoonSectionEnabled && <a href="#/cartoon" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Cartoon</a>}
+                     <a href="#/earn-tokens" onClick={onClose} className="text-yellow-400 text-lg hover:text-yellow-300 p-2 rounded-md transition-colors">Earn Tokens</a>
                 </nav>
             </div>
 
@@ -84,6 +85,10 @@ const MobileMenu: React.FC<{
                         <a href="#/profile" onClick={onClose} className="flex items-center text-lg font-semibold text-white p-2 rounded-md transition-colors">
                             <UserIcon />
                             <span className="ml-3">Profile</span>
+                        </a>
+                         <a href="#/earn-tokens" onClick={onClose} className="flex items-center justify-center text-lg font-semibold bg-yellow-500 text-black px-4 py-2.5 rounded-full hover:opacity-80 transition-opacity">
+                            <TokenIcon />
+                            <span className="ml-2">Tokens: {currentUser.tokens}</span>
                         </a>
                         <button onClick={() => { onLogout(); onClose(); }} className="w-full text-lg font-semibold bg-white text-black px-4 py-2.5 rounded-full hover:opacity-80 transition-opacity">
                             Sign Out
@@ -132,15 +137,16 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
         onSearch(query);
     };
 
-    const NavLink: React.FC<{ href: string; label: string; ariaLabel: string }> = ({ href, label, ariaLabel }) => {
-        // The default route is '/', represented by an empty hash or just '#/'
+    const NavLink: React.FC<{ href: string; label: string; ariaLabel: string, isCta?: boolean }> = ({ href, label, ariaLabel, isCta = false }) => {
         const isBrowseActive = (href === "/#/" && (route === '' || route === '#/'));
         const isActive = isBrowseActive || route === href;
 
         const activeClasses = 'bg-myflix-gray text-white';
         const inactiveClasses = 'text-gray-300 hover:bg-myflix-gray hover:text-white';
+        const ctaClasses = 'text-yellow-400 hover:text-yellow-300 hover:bg-myflix-gray';
+
         return (
-            <a href={href} className={`px-3 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${isActive ? activeClasses : inactiveClasses}`} aria-label={ariaLabel}>
+            <a href={href} className={`px-3 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${isActive ? activeClasses : isCta ? ctaClasses : inactiveClasses}`} aria-label={ariaLabel}>
                 {label}
             </a>
         );
@@ -149,7 +155,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
     return (
         <>
             <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-myflix-black bg-opacity-95' : 'bg-transparent'}`}>
-                <div className="flex items-center justify-between px-4 md:px-10 lg:px-16 py-4">
+                <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-16 py-4">
                     <div className="flex items-center space-x-8">
                          <a href="/#/" title="Go to homepage" aria-label={`${siteName} Homepage`}><MyflixLogo siteName={siteName} /></a>
                         <nav className="hidden md:flex items-center space-x-2">
@@ -157,6 +163,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
                            <NavLink href="#/series" label="Series" ariaLabel="Browse TV series" />
                            <NavLink href="#/livetv" label="Live TV" ariaLabel="Watch live TV channels" />
                            {isCartoonSectionEnabled && <NavLink href="#/cartoon" label="Cartoon" ariaLabel="Browse cartoon content" />}
+                           {currentUser && <NavLink href="#/earn-tokens" label="Earn Tokens" ariaLabel="Earn tokens by watching ads" isCta />}
                         </nav>
                     </div>
                     <div className="hidden md:flex items-center space-x-4">
@@ -175,9 +182,12 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
                         </div>
                         {currentUser ? (
                              <>
-                                <a href="#/profile" title="View your profile" aria-label="View your profile" className="hidden md:flex items-center text-sm font-semibold border border-white px-4 py-1.5 rounded-full hover:bg-white hover:text-black transition-colors">
+                                <a href="#/earn-tokens" title="View your token balance" aria-label="Token balance" className="hidden md:flex items-center text-sm font-semibold border border-yellow-500/50 bg-yellow-500/10 text-yellow-300 px-4 py-1.5 rounded-full hover:bg-yellow-500/20 transition-colors">
+                                    <TokenIcon />
+                                    <span className="ml-2">{currentUser.tokens}</span>
+                                </a>
+                                <a href="#/profile" title="View your profile" aria-label="View your profile" className="hidden md:flex items-center text-sm font-semibold text-white hover:text-gray-300 transition-colors">
                                     <UserIcon />
-                                    <span className="ml-2">Profile</span>
                                 </a>
                                 <button onClick={onLogout} className="text-sm font-semibold bg-white text-black px-4 py-1.5 rounded-full hover:opacity-80 transition-opacity">
                                     Sign Out
@@ -244,7 +254,7 @@ const SearchIcon = () => (
 const UserIcon = () => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        className="h-5 w-5" 
+        className="h-6 w-6" 
         viewBox="0 0 20 20" 
         fill="currentColor"
         aria-hidden="true">
@@ -262,5 +272,13 @@ const CloseIcon = () => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
 );
+
+const TokenIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.414L11 10.586V6z" clipRule="evenodd" />
+        <path d="M10 2a1 1 0 00-1 1v1a1 1 0 102 0V3a1 1 0 00-1-1zM4.22 5.64a1 1 0 00-1.42-1.42l-.71.71a1 1 0 001.42 1.42l.7-.71zM16.9 15.46a1 1 0 00-1.42 1.42l.71.71a1 1 0 001.42-1.42l-.7-.71zM17.62 4.22a1 1 0 00-1.42-1.42l-.7.71a1 1 0 101.42 1.42l.7-.71zM4.93 16.9a1 1 0 00-1.42 1.42l.7.7a1 1 0 001.42-1.42l-.7-.7zM18 10a1 1 0 00-1-1h-1a1 1 0 100 2h1a1 1 0 001-1zM3 10a1 1 0 00-1-1H1a1 1 0 100 2h1a1 1 0 001-1z" />
+    </svg>
+);
+
 
 export default Header;

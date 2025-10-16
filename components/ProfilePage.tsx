@@ -20,7 +20,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, categories, m
         .filter((movie): movie is Movie => movie !== undefined);
 
     return (
-        <div className="min-h-screen pt-24 px-4 md:px-10 lg:px-16">
+        <div className="min-h-screen pt-24 px-4 sm:px-6 md:px-8 lg:px-16">
             <div className="max-w-4xl mx-auto">
                 <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
                     <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-myflix-gray flex items-center justify-center">

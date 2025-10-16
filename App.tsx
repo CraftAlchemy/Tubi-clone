@@ -15,11 +15,14 @@ import LiveTVPage from './components/LiveTVPage';
 import CartoonPage from './components/CartoonPage';
 import Footer from './components/Footer';
 import FAQPage from './components/FAQPage';
+import EarnTokensPage from './components/EarnTokensPage';
+import TokenPromptModal from './components/TokenPromptModal';
 import CarouselSkeleton from './components/skeletons/CarouselSkeleton';
 import ErrorBoundary from './components/ErrorBoundary';
 import { HERO_MOVIE, generateMoreCategories, CATEGORIES, SERIES_CATEGORIES, LIVE_TV_CHANNELS, CARTOON_CATEGORIES } from './data/movies';
 import { USERS } from './data/users';
-import type { User, Category, Movie, SeriesCategory, Series, Episode, LiveTVChannel } from './types';
+import { ADVERTISEMENTS } from './data/advertisements';
+import type { User, Category, Movie, SeriesCategory, Series, Episode, LiveTVChannel, Advertisement } from './types';
 
 const App: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -28,12 +31,14 @@ const App: React.FC = () => {
     const [seriesCategories, setSeriesCategories] = useState<SeriesCategory[]>(SERIES_CATEGORIES);
     const [cartoonCategories, setCartoonCategories] = useState<Category[]>(CARTOON_CATEGORIES);
     const [liveTVChannels, setLiveTVChannels] = useState<LiveTVChannel[]>(LIVE_TV_CHANNELS);
+    const [advertisements, setAdvertisements] = useState<Advertisement[]>(ADVERTISEMENTS);
     const [route, setRoute] = useState(window.location.hash);
     
     // State for modals/details
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
     const [selectedSeries, setSelectedSeries] = useState<Series | null>(null);
-    const [playingContent, setPlayingContent] = useState<Movie | Episode | null>(null);
+    const [playingContent, setPlayingContent] = useState<Movie | Episode | Advertisement | null>(null);
+    const [showTokenPrompt, setShowTokenPrompt] = useState(false);
     
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
@@ -119,6 +124,7 @@ const App: React.FC = () => {
             email,
             password,
             role: 'user',
+            tokens: 5, // Starting tokens for new users
         };
         const updatedUsers = [...users, newUser];
         setUsers(updatedUsers);
@@ -138,8 +144,20 @@ const App: React.FC = () => {
         setLiveTVChannels(updatedChannels);
     };
 
+    const handleAdvertisementsUpdate = (updatedAds: Advertisement[]) => {
+        setAdvertisements(updatedAds);
+    };
+
     const handleUsersUpdate = (updatedUsers: User[]) => {
         setUsers(updatedUsers);
+        // If the current user was updated, reflect those changes
+        if (currentUser) {
+            const updatedCurrentUser = updatedUsers.find(u => u.id === currentUser.id);
+            if (updatedCurrentUser) {
+                const { password: _password, ...userToStore } = updatedCurrentUser;
+                setCurrentUser(userToStore);
+            }
+        }
     };
 
     const handleSiteNameUpdate = async (newName: string) => {
@@ -155,11 +173,9 @@ const App: React.FC = () => {
                     setSiteName(trimmedName);
                 } else {
                     console.error("Failed to update site name on server");
-                    // Optionally, show an error to the user
                 }
             } catch (error) {
                 console.error("Error updating site name:", error);
-                // Optionally, show an error to the user
             }
         }
     };
@@ -179,11 +195,42 @@ const App: React.FC = () => {
     };
 
     const handlePlayMovie = (movie: Movie) => {
+        if (!currentUser) {
+            window.location.hash = '/login';
+            return;
+        }
+        
+        const cost = movie.tokenCost || 0;
+        if (currentUser.tokens < cost) {
+            setShowTokenPrompt(true);
+            return;
+        }
+
+        if (cost > 0) {
+            const updatedUser = { ...currentUser, tokens: currentUser.tokens - cost };
+            setCurrentUser(updatedUser);
+            // Also update the main users list
+            setUsers(users.map(u => u.id === currentUser.id ? { ...u, tokens: u.tokens - cost } : u));
+        }
+        
         setPlayingContent(movie);
     };
 
     const handlePlayEpisode = (episode: Episode) => {
         setPlayingContent(episode);
+    };
+    
+    const handlePlayAd = (ad: Advertisement) => {
+        setPlayingContent(ad);
+    };
+
+    const handleAdFinished = (ad: Advertisement) => {
+        if (!currentUser) return;
+
+        const reward = ad.tokenReward;
+        const updatedUser = { ...currentUser, tokens: currentUser.tokens + reward };
+        setCurrentUser(updatedUser);
+        setUsers(users.map(u => u.id === currentUser.id ? { ...u, tokens: u.tokens + reward } : u));
     };
 
     const handleCloseDetail = () => {
@@ -262,7 +309,7 @@ const App: React.FC = () => {
             case '#/profile':
                 return currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} categories={categories} myList={myList} onMovieClick={handleMovieClick} onToggleMyList={handleToggleMyList} /> : <LoginPage onLogin={handleLogin} />;
             case '#/admin':
-                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} liveTVChannels={liveTVChannels} onLiveTVChannelsUpdate={handleLiveTVChannelsUpdate} siteName={siteName} onSiteNameUpdate={handleSiteNameUpdate} isCartoonSectionEnabled={isCartoonSectionEnabled} onToggleCartoonSection={handleToggleCartoonSection} /> : <div className="pt-24 text-center">Access Denied</div>;
+                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} liveTVChannels={liveTVChannels} onLiveTVChannelsUpdate={handleLiveTVChannelsUpdate} advertisements={advertisements} onAdvertisementsUpdate={handleAdvertisementsUpdate} siteName={siteName} onSiteNameUpdate={handleSiteNameUpdate} isCartoonSectionEnabled={isCartoonSectionEnabled} onToggleCartoonSection={handleToggleCartoonSection} /> : <div className="pt-24 text-center">Access Denied</div>;
             case '#/series':
                 return <SeriesPage seriesCategories={seriesCategories} onSeriesClick={handleSeriesClick} isLoading={isInitialLoading} />;
             case '#/livetv':
@@ -282,13 +329,15 @@ const App: React.FC = () => {
                 />;
             case '#/faq':
                 return <FAQPage siteName={siteName} />;
+            case '#/earn-tokens':
+                return <EarnTokensPage advertisements={advertisements} onPlayAd={handlePlayAd} />;
             default:
                 return (
                     <>
                         <ErrorBoundary fallback={<div className="h-[60vh] md:h-[85vh] w-full bg-myflix-gray flex items-center justify-center p-4 text-center"><p className="text-xl font-bold text-red-400">The hero section failed to load. Please refresh the page.</p></div>}>
                             <Hero movie={HERO_MOVIE} myList={myList} onToggleMyList={handleToggleMyList} currentUser={currentUser} onPlay={handlePlayMovie} isLoading={isInitialLoading} />
                         </ErrorBoundary>
-                        <div className="px-4 md:px-10 lg:px-16 py-8 space-y-12">
+                        <div className="px-4 sm:px-6 md:px-8 lg:px-16 py-8 space-y-12">
                              <ErrorBoundary>
                                 {isInitialLoading ? (
                                     Array.from({ length: 5 }).map((_, index) => <CarouselSkeleton key={index} />)
@@ -321,9 +370,10 @@ const App: React.FC = () => {
                     {renderPage()}
                 </ErrorBoundary>
             </main>
-            {selectedMovie && <MovieDetail movie={selectedMovie} onClose={handleCloseDetail} myList={myList} onToggleMyList={handleToggleMyList} onPlay={handlePlayMovie} />}
+            {selectedMovie && <MovieDetail movie={selectedMovie} onClose={handleCloseDetail} myList={myList} onToggleMyList={handleToggleMyList} onPlay={handlePlayMovie} currentUser={currentUser} />}
             {selectedSeries && <SeriesDetail series={selectedSeries} onClose={handleCloseDetail} onPlayEpisode={handlePlayEpisode} />}
-            {playingContent && <VideoPlayer content={playingContent} onClose={() => setPlayingContent(null)} />}
+            {playingContent && <VideoPlayer content={playingContent} onClose={() => setPlayingContent(null)} onAdFinished={handleAdFinished} />}
+            {showTokenPrompt && <TokenPromptModal onClose={() => setShowTokenPrompt(false)} />}
             <Footer siteName={siteName} />
         </div>
     );

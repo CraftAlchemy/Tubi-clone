@@ -1,4 +1,7 @@
+
+
 import React, { useState } from 'react';
+// FIX: Add side-effect import to load global JSX augmentations for ion-icon.
 import '../../types';
 import type { LiveTVChannel } from '../../types';
 
@@ -78,21 +81,21 @@ const LiveTVManagementTable: React.FC<LiveTVManagementTableProps> = ({ channels,
 
     return (
         <div className="overflow-x-auto">
-            <div className="mb-6 flex justify-between items-center">
+             <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <button onClick={openAddModal} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">
                     Add New Channel
                 </button>
                 {selectedChannels.length > 0 && (
-                     <div className="flex items-center gap-2">
+                     <div className="flex items-center gap-2 self-end sm:self-center">
                          <span className="text-sm text-gray-400">{selectedChannels.length} selected</span>
                          <button onClick={handleBulkDelete} className="px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-500 text-xs font-bold">Delete Selected</button>
                     </div>
                 )}
             </div>
-            <table className="min-w-full bg-admin-card rounded-lg">
-                <thead className="bg-gray-700">
-                    <tr>
-                        <th className="py-3 px-4 w-12">
+            <table className="min-w-full bg-admin-card rounded-lg border-collapse">
+                <thead className="bg-gray-700 hidden md:table-header-group">
+                    <tr className="md:table-row">
+                        <th className="py-3 px-4 w-12 md:table-cell">
                             <input
                                 type="checkbox"
                                 className="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 text-admin-accent rounded focus:ring-admin-accent"
@@ -100,16 +103,16 @@ const LiveTVManagementTable: React.FC<LiveTVManagementTableProps> = ({ channels,
                                 checked={channels.length > 0 && selectedChannels.length === channels.length}
                             />
                         </th>
-                        <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Logo</th>
-                        <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Channel Name</th>
-                        <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Stream URL</th>
-                        <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Actions</th>
+                        <th className="text-left py-3 px-4 uppercase font-semibold text-sm md:table-cell">Logo</th>
+                        <th className="text-left py-3 px-4 uppercase font-semibold text-sm md:table-cell">Channel Name</th>
+                        <th className="text-left py-3 px-4 uppercase font-semibold text-sm md:table-cell">Stream URL</th>
+                        <th className="text-left py-3 px-4 uppercase font-semibold text-sm md:table-cell">Actions</th>
                     </tr>
                 </thead>
                 <tbody className="text-gray-300">
                     {channels.map(channel => (
-                         <tr key={channel.id} className={`border-b border-gray-700 ${selectedChannels.includes(channel.id) ? 'bg-gray-800' : 'hover:bg-gray-800'}`}>
-                             <td className="py-3 px-4">
+                         <tr key={channel.id} className={`block md:table-row mb-4 md:mb-0 rounded-lg md:rounded-none overflow-hidden ${selectedChannels.includes(channel.id) ? 'bg-gray-800' : 'bg-admin-card'} md:bg-transparent border-b border-gray-700`}>
+                             <td className="hidden md:table-cell py-3 px-4">
                                 <input
                                     type="checkbox"
                                     className="form-checkbox h-4 w-4 bg-gray-700 border-gray-600 text-admin-accent rounded focus:ring-admin-accent"
@@ -117,18 +120,28 @@ const LiveTVManagementTable: React.FC<LiveTVManagementTableProps> = ({ channels,
                                     onChange={() => handleSelectChannel(channel.id)}
                                 />
                             </td>
-                            <td className="py-2 px-4">
-                                <img src={channel.logoUrl} alt={channel.name} className="w-12 h-12 rounded-full object-cover bg-gray-700" />
+                            <td className="block md:table-cell p-3 md:py-2 md:px-4 text-right md:text-left border-b md:border-none border-gray-700">
+                                <span className="md:hidden font-semibold float-left">Logo</span>
+                                <img src={channel.logoUrl} alt={channel.name} className="w-12 h-12 rounded-full object-cover bg-gray-700 inline-block" />
                             </td>
-                            <td className="py-3 px-4 font-semibold">{channel.name}</td>
-                            <td className="py-3 px-4 text-sm truncate max-w-xs text-gray-400">{channel.streamUrl}</td>
-                            <td className="py-3 px-4 flex items-center gap-4 h-full mt-4">
-                                <button onClick={() => openEditModal(channel)} className="text-yellow-400 hover:text-yellow-300" title="Edit channel">
-                                    <ion-icon name="pencil-outline"></ion-icon>
-                                </button>
-                                <button onClick={() => setDeleteConfirm(channel)} className="text-red-400 hover:text-red-300" title="Delete channel">
-                                     <ion-icon name="trash-outline"></ion-icon>
-                                </button>
+                            <td className="block md:table-cell p-3 md:py-3 md:px-4 text-right md:text-left border-b md:border-none border-gray-700 font-semibold">
+                                <span className="md:hidden font-semibold float-left">Channel Name</span>
+                                {channel.name}
+                            </td>
+                            <td className="block md:table-cell p-3 md:py-3 md:px-4 text-right md:text-left border-b md:border-none border-gray-700">
+                                <span className="md:hidden font-semibold float-left">Stream URL</span>
+                                <span className="text-sm truncate max-w-xs text-gray-400">{channel.streamUrl}</span>
+                            </td>
+                            <td className="block md:table-cell p-3 md:py-3 md:px-4 text-right md:text-left">
+                                <span className="md:hidden font-semibold float-left">Actions</span>
+                                <div className="flex justify-end md:justify-start items-center gap-4">
+                                    <button onClick={() => openEditModal(channel)} className="text-yellow-400 hover:text-yellow-300" title="Edit channel">
+                                        <ion-icon name="pencil-outline"></ion-icon>
+                                    </button>
+                                    <button onClick={() => setDeleteConfirm(channel)} className="text-red-400 hover:text-red-300" title="Delete channel">
+                                         <ion-icon name="trash-outline"></ion-icon>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     ))}

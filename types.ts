@@ -1,4 +1,4 @@
-import type * as React from 'react';
+import React from 'react';
 
 // The `declare global` block augments React's JSX types to include the custom `ion-icon` element.
 // This file is treated as a module because it contains exports, which ensures
@@ -11,6 +11,7 @@ export interface Movie {
   description?: string;
   videoUrl?: string;
   trailerUrl?: string;
+  tokenCost?: number; // Cost to watch the movie
 }
 
 export interface Category {
@@ -51,6 +52,7 @@ export interface User {
   email: string;
   password?: string; // Password should not be passed around
   role: 'user' | 'admin';
+  tokens: number; // User's token balance
 }
 
 export interface LiveTVChannel {
@@ -59,6 +61,15 @@ export interface LiveTVChannel {
   logoUrl: string;
   streamUrl: string;
 }
+
+export interface Advertisement {
+  id: number;
+  title: string;
+  videoUrl: string;
+  duration: number; // in seconds
+  tokenReward: number;
+}
+
 
 // Add global declaration for ion-icon to fix TypeScript errors.
 // Fix: Use `declare global` to augment JSX's IntrinsicElements from within a module.
