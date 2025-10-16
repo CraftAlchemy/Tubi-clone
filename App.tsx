@@ -13,6 +13,8 @@ import SeriesPage from './components/SeriesPage';
 import SeriesDetail from './components/SeriesDetail';
 import LiveTVPage from './components/LiveTVPage';
 import CartoonPage from './components/CartoonPage';
+import Footer from './components/Footer';
+import FAQPage from './components/FAQPage';
 import CarouselSkeleton from './components/skeletons/CarouselSkeleton';
 import ErrorBoundary from './components/ErrorBoundary';
 import { HERO_MOVIE, generateMoreCategories, CATEGORIES, SERIES_CATEGORIES, LIVE_TV_CHANNELS, CARTOON_CATEGORIES } from './data/movies';
@@ -50,6 +52,23 @@ const App: React.FC = () => {
         };
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const response = await fetch('/api/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    if (config.siteName) {
+                        setSiteName(config.siteName);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch site config:", error);
+            }
+        };
+        fetchConfig();
     }, []);
     
     useEffect(() => {
@@ -123,9 +142,25 @@ const App: React.FC = () => {
         setUsers(updatedUsers);
     };
 
-    const handleSiteNameUpdate = (newName: string) => {
-        if (newName.trim()) {
-            setSiteName(newName.trim());
+    const handleSiteNameUpdate = async (newName: string) => {
+        const trimmedName = newName.trim();
+        if (trimmedName && trimmedName !== siteName) {
+            try {
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ siteName: trimmedName })
+                });
+                if (response.ok) {
+                    setSiteName(trimmedName);
+                } else {
+                    console.error("Failed to update site name on server");
+                    // Optionally, show an error to the user
+                }
+            } catch (error) {
+                console.error("Error updating site name:", error);
+                // Optionally, show an error to the user
+            }
         }
     };
 
@@ -245,6 +280,8 @@ const App: React.FC = () => {
                     currentUser={currentUser}
                     isLoading={isInitialLoading}
                 />;
+            case '#/faq':
+                return <FAQPage siteName={siteName} />;
             default:
                 return (
                     <>
@@ -277,9 +314,9 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="bg-myflix-black text-white min-h-screen font-sans">
+        <div className="bg-myflix-black text-white min-h-screen font-sans flex flex-col">
             <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} route={route} siteName={siteName} isCartoonSectionEnabled={isCartoonSectionEnabled} />
-            <main>
+            <main className="flex-grow">
                 <ErrorBoundary>
                     {renderPage()}
                 </ErrorBoundary>
@@ -287,6 +324,7 @@ const App: React.FC = () => {
             {selectedMovie && <MovieDetail movie={selectedMovie} onClose={handleCloseDetail} myList={myList} onToggleMyList={handleToggleMyList} onPlay={handlePlayMovie} />}
             {selectedSeries && <SeriesDetail series={selectedSeries} onClose={handleCloseDetail} onPlayEpisode={handlePlayEpisode} />}
             {playingContent && <VideoPlayer content={playingContent} onClose={() => setPlayingContent(null)} />}
+            <Footer siteName={siteName} />
         </div>
     );
 };

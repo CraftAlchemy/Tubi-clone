@@ -49,7 +49,7 @@ const MobileMenu: React.FC<{
             aria-modal="true"
         >
             <div className="flex items-center justify-between flex-shrink-0">
-                <a href="/#/" onClick={onClose} title="Go to homepage" aria-label={`${siteName} Homepage`}><MyflixLogo /></a>
+                <a href="/#/" onClick={onClose} title="Go to homepage" aria-label={`${siteName} Homepage`}><MyflixLogo siteName={siteName} /></a>
                 <button onClick={onClose} aria-label="Close menu" className="text-white">
                     <CloseIcon />
                 </button>
@@ -151,7 +151,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
             <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-myflix-black bg-opacity-95' : 'bg-transparent'}`}>
                 <div className="flex items-center justify-between px-4 md:px-10 lg:px-16 py-4">
                     <div className="flex items-center space-x-8">
-                         <a href="/#/" title="Go to homepage" aria-label={`${siteName} Homepage`}><MyflixLogo /></a>
+                         <a href="/#/" title="Go to homepage" aria-label={`${siteName} Homepage`}><MyflixLogo siteName={siteName} /></a>
                         <nav className="hidden md:flex items-center space-x-2">
                            <NavLink href="/#/" label="Browse" ariaLabel="Browse all movies and TV shows" />
                            <NavLink href="#/series" label="Series" ariaLabel="Browse TV series" />
@@ -216,9 +216,9 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
     );
 };
 
-const MyflixLogo = () => (
+const MyflixLogo: React.FC<{ siteName: string }> = ({ siteName }) => (
     <span className="text-3xl font-black tracking-tighter text-myflix-red" style={{ fontFamily: 'system-ui, sans-serif' }}>
-        MYFLIX
+        {siteName.toUpperCase()}
     </span>
 );
 

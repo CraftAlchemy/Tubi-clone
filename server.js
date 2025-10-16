@@ -9,17 +9,19 @@ const { Firestore } = require('@google-cloud/firestore');
 // GOOGLE_APPLICATION_CREDENTIALS environment variable.
 const firestore = new Firestore();
 const contentCollection = firestore.collection('content');
+const configCollection = firestore.collection('config');
 const categoriesDoc = contentCollection.doc('categories_doc');
+const configDoc = configCollection.doc('site_settings');
+
 
 const app = express();
 const PORT = process.env.PORT || 8080; // Use port 8080 for Cloud Run compatibility
 
 // --- Initial Data for Seeding ---
 const { INITIAL_CATEGORIES } = require('./data/initial-data');
+const INITIAL_CONFIG = { siteName: 'Myflix' };
 
-// --- Database Seeding Function ---
-// This function checks if the database has data. If not, it populates it
-// with the initial dataset. This is crucial for the first deployment.
+// --- Database Seeding Functions ---
 const seedDatabase = async () => {
     try {
         const doc = await categoriesDoc.get();
@@ -38,11 +40,60 @@ const seedDatabase = async () => {
     }
 };
 
+const seedConfig = async () => {
+    try {
+        const doc = await configDoc.get();
+        if (!doc.exists) {
+            console.log('No site config found in Firestore. Seeding config...');
+            await configDoc.set(INITIAL_CONFIG);
+            console.log('Site config seeded successfully.');
+        } else {
+            console.log('Site config found in Firestore. Skipping seed.');
+        }
+    } catch (error) {
+        console.error('Error seeding site config:', error);
+        process.exit(1);
+    }
+};
+
+
 // --- Middleware ---
 app.use(cors());
 app.use(bodyParser.json());
 
 // --- API Endpoints ---
+
+// GET /api/config
+app.get('/api/config', async (req, res) => {
+    try {
+        const doc = await configDoc.get();
+        if (!doc.exists) {
+            return res.status(404).json({ error: 'Configuration not found.' });
+        }
+        res.json(doc.data());
+    } catch (error) {
+        console.error('Error fetching config:', error);
+        res.status(500).json({ error: 'Failed to fetch config.' });
+    }
+});
+
+// POST /api/config
+app.post('/api/config', async (req, res) => {
+    const { siteName } = req.body;
+    if (!siteName || typeof siteName !== 'string') {
+        return res.status(400).json({ error: 'Invalid data format. Expected a siteName string.' });
+    }
+
+    try {
+        await configDoc.set({ siteName });
+        console.log('POST /api/config - Site config updated successfully.');
+        res.status(200).json({ message: 'Configuration updated successfully.' });
+    } catch (error) {
+        console.error('Error updating config:', error);
+        res.status(500).json({ error: 'Failed to update config.' });
+    }
+});
+
 
 // GET /api/content
 // Returns the current list of all categories and their movies from Firestore.
@@ -89,6 +140,7 @@ app.listen(PORT, async () => {
   `);
     // Seed the database before the server starts accepting requests.
     await seedDatabase();
+    await seedConfig();
     console.log(`
     ==================================================
     Server is running on http://localhost:${PORT}
