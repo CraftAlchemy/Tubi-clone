@@ -1,10 +1,4 @@
-
-
-
-
-
-// FIX: Moved side-effect import to the top to ensure global type augmentations are loaded first.
-import '../../types';
+// FIX: Removed redundant side-effect import for types as it is now handled globally in index.tsx.
 import React, { useState } from 'react';
 import type { User } from '../../types';
 
@@ -26,7 +20,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
     const paginatedUsers = users.slice(currentPage * USERS_PER_PAGE, (currentPage + 1) * USERS_PER_PAGE);
 
     const openAddModal = () => {
-        setFormData({ id: 0, email: '', password: '', role: 'user' });
+        setFormData({ id: 0, email: '', password: '', role: 'user', tokens: 0 });
         setModal({ type: 'ADD' });
     };
 
@@ -56,7 +50,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
                 email: formData.email,
                 password: formData.password,
                 role: formData.role,
-                tokens: 0,
+                tokens: formData.tokens || 0,
             };
             onUpdate([...users, newUser]);
         } else if (modal?.type === 'EDIT') {
@@ -64,6 +58,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
                 if (u.id === formData.id) {
                     return {
                         ...u,
+                        email: formData.email,
                         role: formData.role,
                         password: formData.password ? formData.password : u.password,
                     };
@@ -92,16 +87,14 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
         );
     };
 
-    const handleSelectAll = () => {
+    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         const paginatedUserIds = paginatedUsers.map(u => u.id);
-        if (selectedUsers.length === paginatedUserIds.length && paginatedUserIds.every(id => selectedUsers.includes(id))) {
-            // If all on page are selected, deselect them
-            const newSelection = selectedUsers.filter(id => !paginatedUserIds.includes(id));
-            setSelectedUsers(newSelection);
+        if (e.target.checked) {
+            // Select all on the page
+             setSelectedUsers(prev => [...new Set([...prev, ...paginatedUserIds])]);
         } else {
-            // Otherwise, select all on the page
-            const newSelection = [...new Set([...selectedUsers, ...paginatedUserIds])];
-            setSelectedUsers(newSelection);
+            // Deselect all on the page
+            setSelectedUsers(prev => prev.filter(id => !paginatedUserIds.includes(id)));
         }
     };
 
@@ -245,7 +238,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
                         )}
                         {modal.type === 'ADD_TOKENS' && (
                             <div>
-                                <label className="text-sm text-gray-400">Tokens to Add</label>
+                                <label className="text-sm text-gray-400">Tokens to Add for {modal.user.email}</label>
                                 <input type="number" name="tokens" value={formData.tokens} onChange={handleFormChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/>
                             </div>
                         )}

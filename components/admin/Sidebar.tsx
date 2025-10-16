@@ -1,91 +1,65 @@
-
-
-
-
-
-
-// FIX: Moved side-effect import to the top to ensure global type augmentations are loaded first.
-import '../../types';
-import React from 'react';
-
-type AdminView = 'dashboard' | 'content' | 'users' | 'monetization' | 'settings';
+// FIX: Removed redundant side-effect import for types as it is now handled globally in index.tsx.
+import React, { useState } from 'react';
 
 interface SidebarProps {
-    view: AdminView;
-    setView: (view: AdminView) => void;
-    isOpen: boolean;
-    setIsOpen: (isOpen: boolean) => void;
-    siteName: string;
+    activeView: string;
+    setActiveView: (view: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ view, setView, isOpen, setIsOpen, siteName }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) => {
+    const [isContentMenuOpen, setIsContentMenuOpen] = useState(false);
     
-    const handleViewChange = (targetView: AdminView) => {
-        setView(targetView);
-        if (window.innerWidth < 1024) { // Tailwind's lg breakpoint
-            setIsOpen(false);
-        }
-    };
-
-    const NavLink: React.FC<{
-        targetView: AdminView;
-        iconName: string;
-        label: string;
-        disabled?: boolean;
-    }> = ({ targetView, iconName, label, disabled }) => {
-        const isActive = view === targetView;
-        const classes = `flex items-center px-4 py-2 rounded-lg transition-colors ${
-            isActive ? 'bg-admin-accent text-white' : 'hover:bg-admin-card'
-        } ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`;
-        
-        return (
-            <div title={disabled ? "Feature coming soon" : ""} className={disabled ? "cursor-not-allowed" : ""}>
-                <button onClick={() => !disabled && handleViewChange(targetView)} className={`${classes} w-full`}>
-                    <Icon name={iconName} />
-                    <span className="ml-3">{label}</span>
-                </button>
-            </div>
-        );
-    };
+    const NavItem: React.FC<{ view: string; label: string; icon: string; }> = ({ view, label, icon }) => (
+         <button 
+            onClick={() => setActiveView(view)} 
+            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md transition-colors ${activeView === view ? 'bg-admin-accent text-white' : 'hover:bg-gray-700'}`}
+        >
+            <ion-icon name={icon} class="text-xl"></ion-icon>
+            <span className="font-medium">{label}</span>
+        </button>
+    );
 
     return (
-        <>
-             {/* Backdrop for mobile */}
-            <div 
-                className={`fixed inset-0 bg-black bg-opacity-60 z-30 transition-opacity lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                onClick={() => setIsOpen(false)}
-                aria-hidden="true"
-            ></div>
+        <div className="w-64 bg-admin-sidebar p-4 flex flex-col space-y-2">
+            <a href="/#/" className="text-2xl font-bold text-myflix-red tracking-wider text-center py-4 mb-4">
+                ADMIN
+            </a>
+            
+            <NavItem view="dashboard" label="Dashboard" icon="grid-outline" />
+            <NavItem view="users" label="Users" icon="people-outline" />
 
-            <aside className={`fixed inset-y-0 left-0 w-64 bg-admin-sidebar text-gray-300 flex flex-col shadow-lg z-40 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-                <div className="h-16 flex items-center justify-between px-4 border-b border-gray-700">
-                     <a href="#/admin" className="text-xl font-bold text-white">{siteName} Admin</a>
-                     <button onClick={() => setIsOpen(false)} className="lg:hidden text-gray-400 hover:text-white" aria-label="Close sidebar">
-                         <ion-icon name="close-outline" style={{ fontSize: '28px' }}></ion-icon>
-                     </button>
-                </div>
-                <nav className="flex-1 px-4 py-6 space-y-2">
-                    <NavLink targetView="dashboard" iconName="bar-chart-outline" label="Dashboard" />
-                    <NavLink targetView="content" iconName="videocam-outline" label="Content" />
-                    <NavLink targetView="users" iconName="people-circle-outline" label="Users" />
-                    <NavLink targetView="monetization" iconName="cash-outline" label="Monetization" />
-                    <NavLink targetView="settings" iconName="settings-outline" label="Settings" />
-                </nav>
-                <div className="px-4 py-6 border-t border-gray-700">
-                     <a href="/#/" className="flex items-center px-4 py-2 rounded-lg hover:bg-admin-card">
-                        <Icon name="exit-outline" />
-                        <span className="ml-3">Back to Site</span>
-                    </a>
-                </div>
-            </aside>
-        </>
+             <div>
+                <button 
+                    onClick={() => setIsContentMenuOpen(!isContentMenuOpen)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-md hover:bg-gray-700"
+                >
+                    <div className="flex items-center space-x-3">
+                         <ion-icon name="folder-open-outline" class="text-xl"></ion-icon>
+                         <span className="font-medium">Content</span>
+                    </div>
+                    <ion-icon name={isContentMenuOpen ? "chevron-up-outline" : "chevron-down-outline"}></ion-icon>
+                </button>
+                {isContentMenuOpen && (
+                    <div className="pl-8 pt-2 space-y-2">
+                        <NavItem view="content-movies" label="Movies" icon="film-outline" />
+                        <NavItem view="content-series" label="Series" icon="tv-outline" />
+                        <NavItem view="content-cartoons" label="Cartoons" icon="color-palette-outline" />
+                    </div>
+                )}
+            </div>
+
+            <NavItem view="livetv" label="Live TV" icon="radio-outline" />
+            <NavItem view="advertising" label="Advertising" icon="cash-outline" />
+            <NavItem view="settings" label="Settings" icon="settings-outline" />
+            
+            <div className="pt-4 mt-auto">
+                 <a href="/#/" className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-md transition-colors hover:bg-gray-700">
+                    <ion-icon name="log-out-outline" class="text-xl"></ion-icon>
+                    <span className="font-medium">Exit Admin</span>
+                </a>
+            </div>
+        </div>
     );
 };
-
-const Icon: React.FC<{ name: string }> = ({ name }) => (
-    <span className="text-2xl">
-        <ion-icon name={name}></ion-icon>
-    </span>
-);
 
 export default Sidebar;

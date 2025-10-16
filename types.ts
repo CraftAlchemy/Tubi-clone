@@ -1,16 +1,19 @@
-
-// Add type augmentation for ion-icon
-declare namespace JSX {
-    interface IntrinsicElements {
-        'ion-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { name: string; style?: React.CSSProperties }, HTMLElement>;
+// FIX: Wrapped the JSX namespace declaration in `declare global` to correctly augment 
+// the JSX.IntrinsicElements type from within a module. This makes the type definition
+// for the custom element 'ion-icon' available globally.
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'ion-icon': any;
+        }
     }
 }
 
 export interface User {
     id: number;
     email: string;
-    password?: string; // Should not be sent to client
-    role: 'user' | 'admin';
+    password?: string; // Should be handled securely on the backend
+    role: 'admin' | 'user';
     tokens: number;
 }
 
@@ -80,4 +83,18 @@ export interface TokenPack {
     amount: number;
     price: number;
     isBestValue: boolean;
+}
+
+export interface InStreamAd {
+    id: number;
+    videoUrl: string;
+    duration: number;
+    placement: 'pre-roll' | 'mid-roll' | 'post-roll';
+}
+  
+export interface BannerAd {
+    id: number;
+    imageUrl: string;
+    linkUrl: string;
+    placement: 'home-top' | 'sidebar' | 'footer';
 }

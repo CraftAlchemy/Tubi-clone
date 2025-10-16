@@ -1,5 +1,4 @@
-// FIX: Add side-effect import for global type definitions.
-import '../types';
+// FIX: Removed redundant side-effect import for types as it is now handled globally in index.tsx.
 import React, { useState, useEffect } from 'react';
 import type { Series, Episode, User, Season } from '../types';
 

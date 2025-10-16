@@ -1,5 +1,5 @@
 
-import type { Category, Movie } from '../types';
+import type { Movie, Category } from '../types';
 
 const generateMovies = (count: number, seed: number): Movie[] => {
   return Array.from({ length: count }, (_, i) => ({
@@ -7,13 +7,13 @@ const generateMovies = (count: number, seed: number): Movie[] => {
     title: `Awesome Movie Title ${seed * 100 + i}`,
     posterUrl: `https://picsum.photos/400/600?random=${seed * 100 + i}`,
     description: `This is a compelling description for Awesome Movie Title ${seed * 100 + i}. It involves action, drama, and a touch of romance that will keep you hooked until the very end.`,
-    tokenCost: (i % 4 === 0 && i > 0) ? Math.floor(i / 2) : undefined,
-    videoUrl: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-    trailerUrl: 'https://www.youtube.com/watch?v=1s-piIAP_vY',
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Placeholder
+    trailerUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Placeholder
+    tokenCost: Math.random() > 0.7 ? Math.floor(Math.random() * 3) + 1 : undefined
   }));
 };
 
-export const MOVIES: Category[] = [
+export const CATEGORIES: Category[] = [
   {
     title: 'Most Popular',
     movies: generateMovies(10, 1),
@@ -34,7 +34,7 @@ export const MOVIES: Category[] = [
     title: 'Comedy Central',
     movies: generateMovies(10, 5),
   },
-    {
+  {
     title: 'Horror Flicks',
     movies: generateMovies(10, 6),
   },

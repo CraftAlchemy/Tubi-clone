@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import type { Advertisement } from '../types';
 
@@ -33,14 +34,14 @@ const getYoutubeEmbedUrl = (url: string | undefined): string | null => {
 
 const AdSessionManager: React.FC<AdSessionManagerProps> = ({ advertisement, onClose, onTokensEarned }) => {
     const [countdown, setCountdown] = useState(advertisement.duration);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const timerRef = useRef<number | null>(null);
 
     const videoUrl = getYoutubeEmbedUrl(advertisement.videoUrl);
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         
-        timerRef.current = setInterval(() => {
+        timerRef.current = window.setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
                     clearInterval(timerRef.current!);
@@ -50,14 +51,20 @@ const AdSessionManager: React.FC<AdSessionManagerProps> = ({ advertisement, onCl
                 return prev - 1;
             });
         }, 1000);
+        
+        // Auto close after ad finishes + a small delay
+        const autoCloseTimer = setTimeout(() => {
+            onClose();
+        }, (advertisement.duration + 2) * 1000);
 
         return () => {
             if (timerRef.current) {
                 clearInterval(timerRef.current);
             }
+            clearTimeout(autoCloseTimer);
             document.body.style.overflow = 'auto';
         };
-    }, [advertisement, onTokensEarned]);
+    }, [advertisement, onTokensEarned, onClose]);
 
     return (
          <div className="fixed inset-0 z-[120] bg-black bg-opacity-90 flex items-center justify-center">
@@ -86,7 +93,7 @@ const AdSessionManager: React.FC<AdSessionManagerProps> = ({ advertisement, onCl
                 {countdown === 0 && (
                      <button 
                         onClick={onClose}
-                        className="absolute top-4 left-4 bg-myflix-red text-white font-bold py-2 px-4 rounded-full hover:opacity-80"
+                        className="absolute top-4 left-4 bg-myflix-red text-white font-bold py-2 px-4 rounded-full hover:opacity-80 animate-fade-in"
                     >
                         Close
                     </button>

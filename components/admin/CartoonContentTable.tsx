@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import '../../types'; // For ion-icon types
 import type { Category, Movie } from '../../types';
 
 interface CartoonContentTableProps {

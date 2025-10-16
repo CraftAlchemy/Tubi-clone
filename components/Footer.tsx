@@ -1,6 +1,4 @@
-
-// FIX: Moved side-effect import to the top to ensure global type augmentations are loaded first.
-import '../types';
+// FIX: Removed redundant side-effect import for types as it is now handled globally in index.tsx.
 import React from 'react';
 
 interface FooterProps {

@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+// FIX: Import global type definitions for components like ion-icon.
+import './types';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
