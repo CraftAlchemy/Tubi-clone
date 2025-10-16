@@ -68,7 +68,7 @@ const App: React.FC = () => {
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
     const [selectedSeries, setSelectedSeries] = useState<Series | null>(null);
     const [playingContent, setPlayingContent] = useState<Movie | Episode | Advertisement | null>(null);
-    const [tokenPrompt, setTokenPrompt] = useState<Movie | null>(null);
+    const [tokenPrompt, setTokenPrompt] = useState<{ title: string; tokenCost: number; } | null>(null);
     const [isBuyTokensModalOpen, setIsBuyTokensModalOpen] = useState(false);
 
 
@@ -165,13 +165,15 @@ const App: React.FC = () => {
             window.location.hash = '/login';
             return;
         }
+        
+        const tokenCost = content.tokenCost;
 
-        if ('tokenCost' in content && content.tokenCost) {
-            if (currentUser.tokens < content.tokenCost) {
-                setTokenPrompt(content);
+        if (tokenCost && tokenCost > 0) {
+            if (currentUser.tokens < tokenCost) {
+                setTokenPrompt({ title: content.title, tokenCost });
                 return;
             }
-            setCurrentUser(prev => prev ? { ...prev, tokens: prev.tokens - content.tokenCost! } : null);
+            setCurrentUser(prev => prev ? { ...prev, tokens: prev.tokens - tokenCost } : null);
         }
         setPlayingContent(content);
         setSelectedMovie(null);
@@ -327,7 +329,7 @@ const App: React.FC = () => {
 
             {tokenPrompt && (
                 <TokenPromptModal
-                    movie={tokenPrompt}
+                    content={tokenPrompt}
                     onClose={() => setTokenPrompt(null)}
                     onEarnTokens={() => {
                         setTokenPrompt(null);

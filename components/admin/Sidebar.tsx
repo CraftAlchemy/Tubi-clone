@@ -4,9 +4,9 @@
 
 
 
-import React from 'react';
-// FIX: Use a side-effect import to ensure the module is loaded and its global JSX augmentations for `ion-icon` are applied.
+// FIX: Moved side-effect import to the top to ensure global type augmentations are loaded first.
 import '../../types';
+import React from 'react';
 
 type AdminView = 'dashboard' | 'content' | 'users' | 'monetization' | 'settings';
 

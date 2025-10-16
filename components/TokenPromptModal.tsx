@@ -1,15 +1,17 @@
 
 import React from 'react';
-import type { Movie } from '../types';
 
 interface TokenPromptModalProps {
-    movie: Movie;
+    content: {
+        title: string;
+        tokenCost: number;
+    };
     onClose: () => void;
     onEarnTokens: () => void;
     onBuyTokens: () => void;
 }
 
-const TokenPromptModal: React.FC<TokenPromptModalProps> = ({ movie, onClose, onEarnTokens, onBuyTokens }) => {
+const TokenPromptModal: React.FC<TokenPromptModalProps> = ({ content, onClose, onEarnTokens, onBuyTokens }) => {
     return (
         <div 
             className="fixed inset-0 z-[110] bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4"
@@ -21,7 +23,7 @@ const TokenPromptModal: React.FC<TokenPromptModalProps> = ({ movie, onClose, onE
             >
                 <h2 className="text-2xl font-bold text-white mb-2">Not Enough Tokens</h2>
                 <p className="text-gray-300 mb-6">
-                    You need <span className="font-bold text-yellow-400">{movie.tokenCost}</span> tokens to watch "{movie.title}", but you only have a few.
+                    You need <span className="font-bold text-yellow-400">{content.tokenCost}</span> tokens to watch "{content.title}", but you don't have enough.
                 </p>
                 
                 <div className="space-y-4">

@@ -1,8 +1,6 @@
-
-
-import React, { useState, useEffect } from 'react';
-// FIX: Use a side-effect import for global JSX definitions and `import type` for type-only imports.
+// FIX: Moved side-effect import to the top to ensure global type augmentations are loaded first.
 import '../../types';
+import React, { useState, useEffect } from 'react';
 import type { Category, Movie } from '../../types';
 
 interface ContentTableProps {
@@ -299,7 +297,7 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                                                                     </div>
                                                                     {movie.tokenCost && (
                                                                         <div className="absolute top-1 right-1 z-10 bg-yellow-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                                                                            <ion-icon name="cash-outline" style={{'fontSize': '14px'}}></ion-icon>
+                                                                            <ion-icon name="cash-outline" style={{fontSize: '14px'}}></ion-icon>
                                                                             <span>{movie.tokenCost}</span>
                                                                         </div>
                                                                     )}

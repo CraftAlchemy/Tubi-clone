@@ -1,6 +1,7 @@
-
+// FIX: Add side-effect import for global type definitions.
+import '../types';
 import React, { useState, useEffect } from 'react';
-import type { Series, Episode, User } from '../types';
+import type { Series, Episode, User, Season } from '../types';
 
 interface SeriesDetailProps {
     series: Series;
@@ -8,6 +9,14 @@ interface SeriesDetailProps {
     onPlayEpisode: (episode: Episode) => void;
     currentUser: User | null;
 }
+
+const getEffectiveTokenCost = (episode: Episode, season: Season, series: Series): number | undefined => {
+    if (episode.tokenCost !== undefined) return episode.tokenCost;
+    if (season.tokenCost !== undefined) return season.tokenCost;
+    if (series.tokenCost !== undefined) return series.tokenCost;
+    return undefined;
+};
+
 
 const SeriesDetail: React.FC<SeriesDetailProps> = ({ series, onClose, onPlayEpisode, currentUser }) => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -74,28 +83,48 @@ const SeriesDetail: React.FC<SeriesDetailProps> = ({ series, onClose, onPlayEpis
                             </div>
                             
                             <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                                {selectedSeason?.episodes.map(episode => (
-                                    <div key={episode.id} className="flex items-center gap-4 p-2 rounded-md hover:bg-myflix-black/50">
-                                        <div className="relative w-32 h-20 flex-shrink-0">
-                                            <img src={episode.posterUrl} alt={episode.title} className="w-full h-full object-cover rounded-md"/>
-                                            <div className="absolute inset-0 bg-black/20"></div>
+                                {selectedSeason?.episodes.map(episode => {
+                                    const tokenCost = getEffectiveTokenCost(episode, selectedSeason, series);
+                                    const hasEnoughTokens = !tokenCost || (currentUser && currentUser.tokens >= tokenCost);
+
+                                    return (
+                                        <div key={episode.id} className="flex items-start sm:items-center gap-4 p-2 rounded-md hover:bg-myflix-black/50 flex-col sm:flex-row">
+                                            <div className="relative w-32 h-20 flex-shrink-0">
+                                                <img src={episode.posterUrl} alt={episode.title} className="w-full h-full object-cover rounded-md"/>
+                                                <div className="absolute inset-0 bg-black/20"></div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-white">{episode.title}</h4>
+                                                <p className="text-xs text-gray-400 line-clamp-2">{episode.description}</p>
+                                                {!hasEnoughTokens && currentUser && (
+                                                    <div className="mt-1 text-xs text-red-400">
+                                                        Not enough tokens. <a href="#/earn-tokens" onClick={onClose} className="font-bold underline hover:text-red-300">Get more.</a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-4 self-end sm:self-center">
+                                                {tokenCost && (
+                                                    <div className="bg-yellow-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                                        <ion-icon name="cash-outline" style={{fontSize: '14px'}}></ion-icon>
+                                                        <span>{tokenCost}</span>
+                                                    </div>
+                                                )}
+                                                <span className="text-sm text-gray-400">{episode.duration}</span>
+                                                <button 
+                                                    onClick={() => {
+                                                        const episodeWithCost = { ...episode, tokenCost };
+                                                        onPlayEpisode(episodeWithCost);
+                                                    }}
+                                                    className={`p-2 rounded-full text-white transition-colors ${hasEnoughTokens ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}
+                                                    title={hasEnoughTokens ? `Play ${episode.title}`: `Requires ${tokenCost} tokens`}
+                                                    disabled={!hasEnoughTokens}
+                                                >
+                                                <PlayIcon />
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-white">{episode.title}</h4>
-                                            <p className="text-xs text-gray-400 line-clamp-2">{episode.description}</p>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-sm text-gray-400">{episode.duration}</span>
-                                            <button 
-                                                onClick={() => onPlayEpisode(episode)} 
-                                                className="bg-white/10 p-2 rounded-full text-white hover:bg-white/20"
-                                                title={`Play ${episode.title}`}
-                                            >
-                                               <PlayIcon />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

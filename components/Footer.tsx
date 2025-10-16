@@ -1,8 +1,9 @@
 
 
-import React from 'react';
-// FIX: Add side-effect import to load global JSX augmentations for ion-icon.
+
+// FIX: Moved side-effect import to the top to ensure global type augmentations are loaded first.
 import '../types';
+import React from 'react';
 
 interface FooterProps {
     siteName: string;

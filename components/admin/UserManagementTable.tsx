@@ -1,8 +1,11 @@
 
 
-import React, { useState } from 'react';
-// FIX: Add side-effect import to load global JSX augmentations for ion-icon.
+
+
+
+// FIX: Moved side-effect import to the top to ensure global type augmentations are loaded first.
 import '../../types';
+import React, { useState } from 'react';
 import type { User } from '../../types';
 
 interface UserManagementTableProps {
@@ -193,7 +196,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
                                         <ion-icon name="pencil-outline"></ion-icon>
                                     </button>
                                     <button onClick={() => setDeleteConfirm(user)} className="text-red-400 hover:text-red-300" title="Delete user">
-                                         <ion-icon name="trash-outline"></ion-icon>
+                                        <ion-icon name="trash-outline"></ion-icon>
                                     </button>
                                 </div>
                             </td>
@@ -201,6 +204,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
                     ))}
                 </tbody>
             </table>
+            
              {totalPages > 1 && (
                 <div className="flex justify-center items-center mt-6 space-x-4">
                     <button
@@ -222,66 +226,45 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
                     </button>
                 </div>
             )}
-            
-            {/* Modal */}
+
+            {/* Modals */}
             {modal && (
-                 <div className="fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center">
+                <div className="fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center">
                     <div className="bg-admin-card p-6 rounded-lg w-full max-w-md space-y-4">
-                        <h3 className="text-xl font-bold">
-                            {modal.type === 'ADD' && 'Add New User'}
-                            {modal.type === 'EDIT' && 'Edit User'}
-                            {modal.type === 'ADD_TOKENS' && `Add Tokens to ${modal.user.email}`}
-                        </h3>
-                        {modal.type === 'ADD' || modal.type === 'EDIT' ? (
+                        <h3 className="text-xl font-bold">{modal.type === 'ADD' ? 'Add User' : (modal.type === 'EDIT' ? 'Edit User' : 'Add Tokens')}</h3>
+                        {['ADD', 'EDIT'].includes(modal.type) && (
                             <>
-                                <div>
-                                    <label className="text-sm text-gray-400">Email</label>
-                                    <input type="email" name="email" value={formData.email} onChange={handleFormChange} disabled={modal.type === 'EDIT'} className="bg-gray-700 rounded px-3 py-2 w-full mt-1 disabled:opacity-50"/>
-                                </div>
-                                <div>
-                                    <label className="text-sm text-gray-400">Password</label>
-                                    <input type="password" name="password" value={formData.password} onChange={handleFormChange} placeholder={modal.type === 'EDIT' ? 'Leave blank to keep current password' : ''} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/>
-                                </div>
-                                <div>
-                                    <label className="text-sm text-gray-400">Role</label>
-                                    <select name="role" value={formData.role} onChange={handleFormChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1">
-                                        <option value="user">User</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
+                                <input type="email" name="email" value={formData.email} onChange={handleFormChange} placeholder="Email" disabled={modal.type === 'EDIT'} className="bg-gray-700 rounded px-3 py-2 w-full disabled:opacity-50"/>
+                                {modal.type === 'ADD' && <input type="password" name="password" value={formData.password} onChange={handleFormChange} placeholder="Password" className="bg-gray-700 rounded px-3 py-2 w-full"/>}
+                                {modal.type === 'EDIT' && <input type="password" name="password" value={formData.password} onChange={handleFormChange} placeholder="New Password (optional)" className="bg-gray-700 rounded px-3 py-2 w-full"/>}
+                                <select name="role" value={formData.role} onChange={handleFormChange} className="bg-gray-700 rounded px-3 py-2 w-full">
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
                             </>
-                        ) : (
+                        )}
+                        {modal.type === 'ADD_TOKENS' && (
                             <div>
-                                <label className="text-sm text-gray-400">Amount</label>
+                                <label className="text-sm text-gray-400">Tokens to Add</label>
                                 <input type="number" name="tokens" value={formData.tokens} onChange={handleFormChange} className="bg-gray-700 rounded px-3 py-2 w-full mt-1"/>
                             </div>
                         )}
-                        <div className="flex justify-end gap-4 pt-4">
+                        <div className="flex justify-end gap-4">
                             <button onClick={() => setModal(null)} className="bg-gray-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
-                            <button onClick={handleSubmit} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">
-                                {modal.type === 'ADD_TOKENS' ? 'Add Tokens' : modal.type === 'ADD' ? 'Add User' : 'Save Changes'}
-                            </button>
+                            <button onClick={handleSubmit} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">Save</button>
                         </div>
                     </div>
                 </div>
             )}
 
-             {/* Delete Confirmation Modal */}
             {deleteConfirm && (
-                 <div className="fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center">
-                    <div className="bg-admin-card p-6 rounded-lg w-full max-w-md space-y-4 text-center">
-                        <h3 className="text-xl font-bold text-white">Are you sure?</h3>
-                        <p className="text-gray-300">
-                            You are about to delete the user <span className="font-semibold text-white">{deleteConfirm.email}</span>.
-                            This action cannot be undone.
-                        </p>
-                        <div className="flex justify-center gap-4 pt-4">
-                            <button onClick={() => setDeleteConfirm(null)} className="bg-gray-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">
-                                Cancel
-                            </button>
-                            <button onClick={() => handleDelete(deleteConfirm)} className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-md">
-                                Delete User
-                            </button>
+                <div className="fixed inset-0 z-[100] bg-black bg-opacity-70 flex items-center justify-center">
+                    <div className="bg-admin-card p-6 rounded-lg w-full max-w-md text-center">
+                        <h3 className="text-xl font-bold">Are you sure?</h3>
+                        <p className="my-4">You want to delete user "{deleteConfirm.email}". This cannot be undone.</p>
+                        <div className="flex justify-center gap-4">
+                            <button onClick={() => setDeleteConfirm(null)} className="bg-gray-600">Cancel</button>
+                            <button onClick={() => handleDelete(deleteConfirm)} className="bg-red-600">Delete</button>
                         </div>
                     </div>
                 </div>
@@ -290,4 +273,5 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
     );
 };
 
+export { UserManagementTable };
 export default UserManagementTable;
