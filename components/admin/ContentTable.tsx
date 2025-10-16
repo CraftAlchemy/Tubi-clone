@@ -18,6 +18,8 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
     const [editFormData, setEditFormData] = useState<Partial<Movie>>({ title: '', description: '', posterUrl: '', videoUrl: '', trailerUrl: '' });
     const [dragItem, setDragItem] = useState<{ categoryIndex: number; movieIndex: number } | null>(null);
     const [currentPages, setCurrentPages] = useState<{ [categoryTitle: string]: number }>({});
+    const [selectedMovies, setSelectedMovies] = useState<{ [categoryTitle: string]: number[] }>({});
+
 
     useEffect(() => {
         if (editingMovie) {
@@ -135,6 +137,46 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
         setDragItem(null);
     };
 
+    const handleSelectMovie = (categoryTitle: string, movieId: number) => {
+        setSelectedMovies(prev => {
+            const currentSelection = prev[categoryTitle] || [];
+            if (currentSelection.includes(movieId)) {
+                return { ...prev, [categoryTitle]: currentSelection.filter(id => id !== movieId) };
+            } else {
+                return { ...prev, [categoryTitle]: [...currentSelection, movieId] };
+            }
+        });
+    };
+
+    const handleSelectAllMovies = (categoryTitle: string, paginatedMovieIds: number[]) => {
+        setSelectedMovies(prev => {
+            const currentSelection = prev[categoryTitle] || [];
+            const allSelected = paginatedMovieIds.every(id => currentSelection.includes(id));
+            if (allSelected) {
+                // Deselect all on this page
+                return { ...prev, [categoryTitle]: currentSelection.filter(id => !paginatedMovieIds.includes(id)) };
+            } else {
+                // Select all on this page
+                const newSelection = [...new Set([...currentSelection, ...paginatedMovieIds])];
+                return { ...prev, [categoryTitle]: newSelection };
+            }
+        });
+    };
+    
+    const handleBulkDelete = (categoryTitle: string) => {
+        const moviesToDelete = selectedMovies[categoryTitle] || [];
+        if (moviesToDelete.length === 0) return;
+
+        const updatedCategories = categories.map(cat => {
+            if (cat.title === categoryTitle) {
+                return { ...cat, movies: cat.movies.filter(m => !moviesToDelete.includes(m.id)) };
+            }
+            return cat;
+        });
+        onContentUpdate(updatedCategories);
+        setSelectedMovies(prev => ({ ...prev, [categoryTitle]: [] }));
+    };
+
     return (
         <div className="overflow-x-auto">
             <div className="mb-6 flex gap-4">
@@ -201,9 +243,27 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                                             const page = currentPages[category.title] || 0;
                                             const totalPages = Math.ceil(category.movies.length / MOVIES_PER_PAGE);
                                             const paginatedMovies = category.movies.slice(page * MOVIES_PER_PAGE, (page + 1) * MOVIES_PER_PAGE);
+                                            const paginatedMovieIds = paginatedMovies.map(m => m.id);
+                                            const selectedInCategory = selectedMovies[category.title] || [];
+                                            const allOnPageSelected = paginatedMovieIds.length > 0 && paginatedMovieIds.every(id => selectedInCategory.includes(id));
 
                                             return (
                                                 <>
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <input type="checkbox"
+                                                                className="form-checkbox h-4 w-4 bg-gray-700 border-gray-600 text-admin-accent rounded focus:ring-admin-accent"
+                                                                onChange={() => handleSelectAllMovies(category.title, paginatedMovieIds)}
+                                                                checked={allOnPageSelected}
+                                                            />
+                                                            <label className="text-sm">Select all on page</label>
+                                                        </div>
+                                                        {selectedInCategory.length > 0 && (
+                                                            <button onClick={() => handleBulkDelete(category.title)} className="bg-red-600 text-white text-xs font-bold py-1 px-3 rounded-md hover:bg-red-500">
+                                                                Delete Selected ({selectedInCategory.length})
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                                         {paginatedMovies.map((movie, movieIndex) => {
                                                             const originalMovieIndex = page * MOVIES_PER_PAGE + movieIndex;
@@ -217,11 +277,17 @@ const ContentTable: React.FC<ContentTableProps> = ({ categories, onContentUpdate
                                                                     onDragOver={(e) => e.preventDefault()}
                                                                     onDragEnd={handleDragEnd}
                                                                 >
+                                                                    <div className="absolute top-1 left-1 z-10">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            className="form-checkbox h-4 w-4 bg-gray-800 border-gray-500 text-admin-accent rounded focus:ring-admin-accent opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                            checked={selectedInCategory.includes(movie.id)}
+                                                                            onChange={() => handleSelectMovie(category.title, movie.id)}
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                        />
+                                                                    </div>
                                                                     <img src={movie.posterUrl} alt={movie.title} className="rounded-md w-full aspect-[2/3] object-cover" />
                                                                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-70 transition-all duration-300 rounded-md">
-                                                                        <div className="absolute top-2 left-2 text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" title="Drag to reorder">
-                                                                            <ion-icon name="move-outline"></ion-icon>
-                                                                        </div>
                                                                         <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                                             <button 
                                                                                 onClick={() => setEditingMovie({ movie, categoryTitle: category.title })} 

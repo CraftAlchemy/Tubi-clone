@@ -14,6 +14,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
     const [modal, setModal] = useState<null | { type: 'ADD' } | { type: 'EDIT'; user: User }>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<User | null>(null);
     const [formData, setFormData] = useState({ id: 0, email: '', password: '', role: 'user' as 'user' | 'admin' });
+    const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
     
     const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
     const paginatedUsers = users.slice(currentPage * USERS_PER_PAGE, (currentPage + 1) * USERS_PER_PAGE);
@@ -68,16 +69,63 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
         setDeleteConfirm(null);
     };
 
+    const handleSelectUser = (userId: number) => {
+        setSelectedUsers(prev => 
+            prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+        );
+    };
+
+    const handleSelectAll = () => {
+        const paginatedUserIds = paginatedUsers.map(u => u.id);
+        if (selectedUsers.length === paginatedUserIds.length) {
+            setSelectedUsers([]);
+        } else {
+            setSelectedUsers(paginatedUserIds);
+        }
+    };
+
+    const handleBulkDelete = () => {
+        if (window.confirm(`Are you sure you want to delete ${selectedUsers.length} user(s)?`)) {
+            onUpdate(users.filter(u => !selectedUsers.includes(u.id)));
+            setSelectedUsers([]);
+        }
+    };
+    
+    const handleBulkRoleChange = (role: 'admin' | 'user') => {
+        onUpdate(users.map(u => 
+            selectedUsers.includes(u.id) ? { ...u, role } : u
+        ));
+        setSelectedUsers([]);
+    };
+
     return (
         <div className="overflow-x-auto">
-             <div className="mb-6">
+             <div className="mb-6 flex justify-between items-center">
                 <button onClick={openAddModal} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">
                     Add New User
                 </button>
+                 {selectedUsers.length > 0 && (
+                     <div className="flex items-center gap-2">
+                         <span className="text-sm text-gray-400">{selectedUsers.length} selected</span>
+                         <div className="flex items-center gap-2 p-1 bg-admin-card rounded-md">
+                            <button onClick={handleBulkDelete} title="Delete Selected" className="px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-500 text-xs font-bold">Delete</button>
+                            <button onClick={() => handleBulkRoleChange('admin')} title="Change Role to Admin" className="px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-500 text-xs font-bold">Make Admin</button>
+                            <button onClick={() => handleBulkRoleChange('user')} title="Change Role to User" className="px-2 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-500 text-xs font-bold">Make User</button>
+                         </div>
+                    </div>
+                )}
             </div>
             <table className="min-w-full bg-admin-card rounded-lg">
                 <thead className="bg-gray-700">
                     <tr>
+                        <th className="py-3 px-4 w-12">
+                            <input
+                                type="checkbox"
+                                className="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 text-admin-accent rounded focus:ring-admin-accent"
+                                onChange={handleSelectAll}
+                                checked={paginatedUsers.length > 0 && selectedUsers.length === paginatedUsers.length}
+                            />
+                        </th>
                         <th className="text-left py-3 px-4 uppercase font-semibold text-sm">User ID</th>
                         <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Email</th>
                         <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Role</th>
@@ -86,7 +134,15 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({ users, onUpda
                 </thead>
                 <tbody className="text-gray-300">
                     {paginatedUsers.map(user => (
-                         <tr key={user.id} className="border-b border-gray-700 hover:bg-gray-800">
+                         <tr key={user.id} className={`border-b border-gray-700 ${selectedUsers.includes(user.id) ? 'bg-gray-800' : 'hover:bg-gray-800'}`}>
+                            <td className="py-3 px-4">
+                                 <input
+                                    type="checkbox"
+                                    className="form-checkbox h-4 w-4 bg-gray-700 border-gray-600 text-admin-accent rounded focus:ring-admin-accent"
+                                    checked={selectedUsers.includes(user.id)}
+                                    onChange={() => handleSelectUser(user.id)}
+                                />
+                            </td>
                             <td className="py-3 px-4">{user.id}</td>
                             <td className="py-3 px-4">{user.email}</td>
                             <td className="py-3 px-4">

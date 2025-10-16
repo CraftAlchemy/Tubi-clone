@@ -11,6 +11,7 @@ const LiveTVManagementTable: React.FC<LiveTVManagementTableProps> = ({ channels,
     const [modal, setModal] = useState<null | { type: 'ADD' } | { type: 'EDIT'; channel: LiveTVChannel }>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<LiveTVChannel | null>(null);
     const [formData, setFormData] = useState<Partial<LiveTVChannel>>({ name: '', logoUrl: '', streamUrl: '' });
+    const [selectedChannels, setSelectedChannels] = useState<number[]>([]);
 
     const openAddModal = () => {
         setFormData({ name: '', logoUrl: '', streamUrl: '' });
@@ -54,16 +55,51 @@ const LiveTVManagementTable: React.FC<LiveTVManagementTableProps> = ({ channels,
         setDeleteConfirm(null);
     };
 
+    const handleSelectChannel = (channelId: number) => {
+        setSelectedChannels(prev => 
+            prev.includes(channelId) ? prev.filter(id => id !== channelId) : [...prev, channelId]
+        );
+    };
+
+    const handleSelectAll = () => {
+        if (selectedChannels.length === channels.length) {
+            setSelectedChannels([]);
+        } else {
+            setSelectedChannels(channels.map(c => c.id));
+        }
+    };
+    
+    const handleBulkDelete = () => {
+        if (window.confirm(`Are you sure you want to delete ${selectedChannels.length} channel(s)?`)) {
+            onUpdate(channels.filter(c => !selectedChannels.includes(c.id)));
+            setSelectedChannels([]);
+        }
+    };
+
     return (
         <div className="overflow-x-auto">
-            <div className="mb-6">
+            <div className="mb-6 flex justify-between items-center">
                 <button onClick={openAddModal} className="bg-admin-accent hover:opacity-90 text-white font-bold py-2 px-4 rounded-md">
                     Add New Channel
                 </button>
+                {selectedChannels.length > 0 && (
+                     <div className="flex items-center gap-2">
+                         <span className="text-sm text-gray-400">{selectedChannels.length} selected</span>
+                         <button onClick={handleBulkDelete} className="px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-500 text-xs font-bold">Delete Selected</button>
+                    </div>
+                )}
             </div>
             <table className="min-w-full bg-admin-card rounded-lg">
                 <thead className="bg-gray-700">
                     <tr>
+                        <th className="py-3 px-4 w-12">
+                            <input
+                                type="checkbox"
+                                className="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 text-admin-accent rounded focus:ring-admin-accent"
+                                onChange={handleSelectAll}
+                                checked={channels.length > 0 && selectedChannels.length === channels.length}
+                            />
+                        </th>
                         <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Logo</th>
                         <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Channel Name</th>
                         <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Stream URL</th>
@@ -72,7 +108,15 @@ const LiveTVManagementTable: React.FC<LiveTVManagementTableProps> = ({ channels,
                 </thead>
                 <tbody className="text-gray-300">
                     {channels.map(channel => (
-                         <tr key={channel.id} className="border-b border-gray-700 hover:bg-gray-800">
+                         <tr key={channel.id} className={`border-b border-gray-700 ${selectedChannels.includes(channel.id) ? 'bg-gray-800' : 'hover:bg-gray-800'}`}>
+                             <td className="py-3 px-4">
+                                <input
+                                    type="checkbox"
+                                    className="form-checkbox h-4 w-4 bg-gray-700 border-gray-600 text-admin-accent rounded focus:ring-admin-accent"
+                                    checked={selectedChannels.includes(channel.id)}
+                                    onChange={() => handleSelectChannel(channel.id)}
+                                />
+                            </td>
                             <td className="py-2 px-4">
                                 <img src={channel.logoUrl} alt={channel.name} className="w-12 h-12 rounded-full object-cover bg-gray-700" />
                             </td>

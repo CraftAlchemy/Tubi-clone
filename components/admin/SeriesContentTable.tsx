@@ -9,6 +9,7 @@ interface SeriesContentTableProps {
 
 const SeriesContentTable: React.FC<SeriesContentTableProps> = ({ seriesCategories, onContentUpdate }) => {
     const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
+    const [selectedEpisodes, setSelectedEpisodes] = useState<{ [seasonId: number]: number[] }>({});
     
     const [modal, setModal] = useState<null | 
         { type: 'ADD_CATEGORY' } |
@@ -118,6 +119,59 @@ const SeriesContentTable: React.FC<SeriesContentTableProps> = ({ seriesCategorie
         }
         onContentUpdate(updatedCategories);
         setDeleteConfirm(null);
+    };
+
+    const handleSelectEpisode = (seasonId: number, episodeId: number) => {
+        setSelectedEpisodes(prev => {
+            const currentSelection = prev[seasonId] || [];
+            if (currentSelection.includes(episodeId)) {
+                return { ...prev, [seasonId]: currentSelection.filter(id => id !== episodeId) };
+            } else {
+                return { ...prev, [seasonId]: [...currentSelection, episodeId] };
+            }
+        });
+    };
+
+    const handleSelectAllEpisodes = (season: Season) => {
+        const episodeIds = season.episodes.map(ep => ep.id);
+        setSelectedEpisodes(prev => {
+            const currentSelection = prev[season.id] || [];
+            if (currentSelection.length === episodeIds.length) {
+                return { ...prev, [season.id]: [] }; // Deselect all
+            } else {
+                return { ...prev, [season.id]: episodeIds }; // Select all
+            }
+        });
+    };
+    
+    const handleBulkDeleteEpisodes = (catTitle: string, seriesId: number, seasonId: number) => {
+        const episodesToDelete = selectedEpisodes[seasonId] || [];
+        if (episodesToDelete.length === 0) return;
+
+        const updatedCategories = seriesCategories.map(c => {
+            if (c.title === catTitle) {
+                return {
+                    ...c,
+                    series: c.series.map(s => {
+                        if (s.id === seriesId) {
+                            return {
+                                ...s,
+                                seasons: s.seasons.map(se => {
+                                    if (se.id === seasonId) {
+                                        return { ...se, episodes: se.episodes.filter(ep => !episodesToDelete.includes(ep.id)) };
+                                    }
+                                    return se;
+                                })
+                            };
+                        }
+                        return s;
+                    })
+                };
+            }
+            return c;
+        });
+        onContentUpdate(updatedCategories);
+        setSelectedEpisodes(prev => ({ ...prev, [seasonId]: [] }));
     };
 
 
@@ -241,8 +295,29 @@ const SeriesContentTable: React.FC<SeriesContentTableProps> = ({ seriesCategorie
                                                 </div>
                                                  {expanded[`${cat.title}-${series.id}-${season.id}`] && (
                                                     <div className="pt-2 pl-8 space-y-1">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <input type="checkbox"
+                                                                    className="form-checkbox h-4 w-4 bg-gray-700 border-gray-600 text-admin-accent rounded focus:ring-admin-accent"
+                                                                    onChange={() => handleSelectAllEpisodes(season)}
+                                                                    checked={season.episodes.length > 0 && selectedEpisodes[season.id]?.length === season.episodes.length}
+                                                                />
+                                                                <label className="text-xs">Select all</label>
+                                                            </div>
+                                                            {(selectedEpisodes[season.id] || []).length > 0 && (
+                                                                <button onClick={() => handleBulkDeleteEpisodes(cat.title, series.id, season.id)} className="bg-red-600 text-white text-xs font-bold py-1 px-3 rounded-md hover:bg-red-500">
+                                                                    Delete Selected ({(selectedEpisodes[season.id] || []).length})
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                          {season.episodes.map(ep => (
                                                             <div key={ep.id} className="flex items-center p-1.5 rounded-md hover:bg-admin-card/30">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="form-checkbox h-4 w-4 bg-gray-700 border-gray-600 text-admin-accent rounded focus:ring-admin-accent mr-3"
+                                                                    checked={(selectedEpisodes[season.id] || []).includes(ep.id)}
+                                                                    onChange={() => handleSelectEpisode(season.id, ep.id)}
+                                                                />
                                                                 <img src={ep.posterUrl} className="w-16 h-9 object-cover rounded-sm mr-3"/>
                                                                 <span className="text-sm flex-1">{ep.title}</span>
                                                                 <div className="flex gap-2">
