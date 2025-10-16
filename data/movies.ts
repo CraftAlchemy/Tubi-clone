@@ -116,6 +116,18 @@ export const SERIES_CATEGORIES: SeriesCategory[] = [
     }
 ];
 
+// --- Cartoon Data ---
+export const CARTOON_CATEGORIES: Category[] = [
+  {
+    title: 'Animated Adventures',
+    movies: generateMovies(10, 20),
+  },
+  {
+    title: 'Family Fun Cartoons',
+    movies: generateMovies(10, 21),
+  },
+];
+
 // --- Live TV Data ---
 export const LIVE_TV_CHANNELS: LiveTVChannel[] = [
     {

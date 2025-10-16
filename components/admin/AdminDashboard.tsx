@@ -23,6 +23,8 @@ interface AdminDashboardProps {
     onLiveTVChannelsUpdate: (channels: LiveTVChannel[]) => void;
     siteName: string;
     onSiteNameUpdate: (newName: string) => void;
+    isCartoonSectionEnabled: boolean;
+    onToggleCartoonSection: (isEnabled: boolean) => void;
 }
 
 type AdminView = 'dashboard' | 'content' | 'users' | 'settings';
@@ -37,7 +39,7 @@ const AdminMobileHeader: React.FC<{ onMenuClick: () => void; siteName: string }>
 );
 
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, categories, onContentUpdate, seriesCategories, onSeriesContentUpdate, liveTVChannels, onLiveTVChannelsUpdate, siteName, onSiteNameUpdate }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, categories, onContentUpdate, seriesCategories, onSeriesContentUpdate, liveTVChannels, onLiveTVChannelsUpdate, siteName, onSiteNameUpdate, isCartoonSectionEnabled, onToggleCartoonSection }) => {
     const [view, setView] = useState<AdminView>('dashboard');
     const [activeContentTab, setActiveContentTab] = useState<'movies' | 'series' | 'livetv'>('movies');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -106,7 +108,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, onUsersUpdate, c
                      </div>
                 );
             case 'settings':
-                return <SettingsPage siteName={siteName} onSiteNameUpdate={onSiteNameUpdate} />;
+                return <SettingsPage siteName={siteName} onSiteNameUpdate={onSiteNameUpdate} isCartoonSectionEnabled={isCartoonSectionEnabled} onToggleCartoonSection={onToggleCartoonSection} />;
         }
     }
 

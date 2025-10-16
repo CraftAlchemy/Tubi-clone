@@ -8,6 +8,7 @@ interface HeaderProps {
     onSearch: (query: string) => void;
     route: string;
     siteName: string;
+    isCartoonSectionEnabled: boolean;
 }
 
 const MobileMenu: React.FC<{
@@ -17,7 +18,8 @@ const MobileMenu: React.FC<{
     onLogout: () => void;
     onSearch: (query: string) => void;
     siteName: string;
-}> = ({ isOpen, onClose, currentUser, onLogout, onSearch, siteName }) => {
+    isCartoonSectionEnabled: boolean;
+}> = ({ isOpen, onClose, currentUser, onLogout, onSearch, siteName, isCartoonSectionEnabled }) => {
     
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -72,7 +74,7 @@ const MobileMenu: React.FC<{
                      <a href="/#/" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Browse</a>
                      <a href="#/series" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Series</a>
                      <a href="#/livetv" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Live TV</a>
-                     <a href="#/kids" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Tubi Kids</a>
+                     {isCartoonSectionEnabled && <a href="#/cartoon" onClick={onClose} className="text-gray-200 text-lg hover:text-white p-2 rounded-md transition-colors">Cartoon</a>}
                 </nav>
             </div>
 
@@ -103,7 +105,7 @@ const MobileMenu: React.FC<{
 };
 
 
-const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route, siteName }) => {
+const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route, siteName, isCartoonSectionEnabled }) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -154,7 +156,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
                            <NavLink href="/#/" label="Browse" ariaLabel="Browse all movies and TV shows" />
                            <NavLink href="#/series" label="Series" ariaLabel="Browse TV series" />
                            <NavLink href="#/livetv" label="Live TV" ariaLabel="Watch live TV channels" />
-                           <NavLink href="#/kids" label="Tubi Kids" ariaLabel="Browse content safe for kids" />
+                           {isCartoonSectionEnabled && <NavLink href="#/cartoon" label="Cartoon" ariaLabel="Browse cartoon content" />}
                         </nav>
                     </div>
                     <div className="hidden md:flex items-center space-x-4">
@@ -208,6 +210,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, onSearch, route,
                 onLogout={onLogout}
                 onSearch={onSearch}
                 siteName={siteName}
+                isCartoonSectionEnabled={isCartoonSectionEnabled}
             />
         </>
     );

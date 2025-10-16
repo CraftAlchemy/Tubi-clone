@@ -12,9 +12,10 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import SeriesPage from './components/SeriesPage';
 import SeriesDetail from './components/SeriesDetail';
 import LiveTVPage from './components/LiveTVPage';
+import CartoonPage from './components/CartoonPage';
 import CarouselSkeleton from './components/skeletons/CarouselSkeleton';
 import ErrorBoundary from './components/ErrorBoundary';
-import { HERO_MOVIE, generateMoreCategories, CATEGORIES, SERIES_CATEGORIES, LIVE_TV_CHANNELS } from './data/movies';
+import { HERO_MOVIE, generateMoreCategories, CATEGORIES, SERIES_CATEGORIES, LIVE_TV_CHANNELS, CARTOON_CATEGORIES } from './data/movies';
 import { USERS } from './data/users';
 import type { User, Category, Movie, SeriesCategory, Series, Episode, LiveTVChannel } from './types';
 
@@ -23,6 +24,7 @@ const App: React.FC = () => {
     const [users, setUsers] = useState<User[]>(USERS);
     const [categories, setCategories] = useState<Category[]>(CATEGORIES);
     const [seriesCategories, setSeriesCategories] = useState<SeriesCategory[]>(SERIES_CATEGORIES);
+    const [cartoonCategories, setCartoonCategories] = useState<Category[]>(CARTOON_CATEGORIES);
     const [liveTVChannels, setLiveTVChannels] = useState<LiveTVChannel[]>(LIVE_TV_CHANNELS);
     const [route, setRoute] = useState(window.location.hash);
     
@@ -37,6 +39,7 @@ const App: React.FC = () => {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [myList, setMyList] = useState<number[]>([]);
     const [siteName, setSiteName] = useState('Tubi TV Clone');
+    const [isCartoonSectionEnabled, setIsCartoonSectionEnabled] = useState(true);
 
     useEffect(() => {
         const handleHashChange = () => {
@@ -124,6 +127,10 @@ const App: React.FC = () => {
         if (newName.trim()) {
             setSiteName(newName.trim());
         }
+    };
+
+    const handleToggleCartoonSection = (isEnabled: boolean) => {
+        setIsCartoonSectionEnabled(isEnabled);
     };
 
     const handleMovieClick = (movie: Movie) => {
@@ -220,11 +227,24 @@ const App: React.FC = () => {
             case '#/profile':
                 return currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} categories={categories} myList={myList} onMovieClick={handleMovieClick} onToggleMyList={handleToggleMyList} /> : <LoginPage onLogin={handleLogin} />;
             case '#/admin':
-                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} liveTVChannels={liveTVChannels} onLiveTVChannelsUpdate={handleLiveTVChannelsUpdate} siteName={siteName} onSiteNameUpdate={handleSiteNameUpdate} /> : <div className="pt-24 text-center">Access Denied</div>;
+                return currentUser?.role === 'admin' ? <AdminDashboard users={users} onUsersUpdate={handleUsersUpdate} categories={categories} onContentUpdate={handleContentUpdate} seriesCategories={seriesCategories} onSeriesContentUpdate={handleSeriesContentUpdate} liveTVChannels={liveTVChannels} onLiveTVChannelsUpdate={handleLiveTVChannelsUpdate} siteName={siteName} onSiteNameUpdate={handleSiteNameUpdate} isCartoonSectionEnabled={isCartoonSectionEnabled} onToggleCartoonSection={handleToggleCartoonSection} /> : <div className="pt-24 text-center">Access Denied</div>;
             case '#/series':
                 return <SeriesPage seriesCategories={seriesCategories} onSeriesClick={handleSeriesClick} isLoading={isInitialLoading} />;
             case '#/livetv':
                 return <LiveTVPage channels={liveTVChannels} />;
+            case '#/cartoon':
+                if (!isCartoonSectionEnabled) {
+                    window.location.hash = '/';
+                    return null;
+                }
+                return <CartoonPage 
+                    categories={cartoonCategories} 
+                    onMovieClick={handleMovieClick}
+                    myList={myList}
+                    onToggleMyList={handleToggleMyList}
+                    currentUser={currentUser}
+                    isLoading={isInitialLoading}
+                />;
             default:
                 return (
                     <>
@@ -258,7 +278,7 @@ const App: React.FC = () => {
 
     return (
         <div className="bg-tubi-black text-white min-h-screen font-sans">
-            <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} route={route} siteName={siteName} />
+            <Header currentUser={currentUser} onLogout={handleLogout} onSearch={handleSearch} route={route} siteName={siteName} isCartoonSectionEnabled={isCartoonSectionEnabled} />
             <main>
                 <ErrorBoundary>
                     {renderPage()}

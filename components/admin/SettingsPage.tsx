@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 interface SettingsPageProps {
     siteName: string;
     onSiteNameUpdate: (newName: string) => void;
+    isCartoonSectionEnabled: boolean;
+    onToggleCartoonSection: (isEnabled: boolean) => void;
 }
 
-const SettingsPage: React.FC<SettingsPageProps> = ({ siteName, onSiteNameUpdate }) => {
+const SettingsPage: React.FC<SettingsPageProps> = ({ siteName, onSiteNameUpdate, isCartoonSectionEnabled, onToggleCartoonSection }) => {
     const [name, setName] = useState(siteName);
     const [isSaved, setIsSaved] = useState(false);
 
@@ -50,6 +52,26 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ siteName, onSiteNameUpdate 
                     >
                         Save Changes
                     </button>
+                 </div>
+            </div>
+
+            <div className="bg-admin-sidebar p-6 rounded-lg shadow-lg max-w-2xl mt-8">
+                 <h2 className="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-4">Feature Toggles</h2>
+                 
+                 <div className="flex items-center justify-between">
+                    <div>
+                        <label htmlFor="cartoonToggle" className="block text-sm font-medium text-gray-300">
+                            Enable Cartoon Section
+                        </label>
+                        <p className="text-xs text-gray-400 mt-1">Show the "Cartoon" link in the main navigation header.</p>
+                    </div>
+                     <label htmlFor="cartoonToggle" className="flex items-center cursor-pointer">
+                         <div className="relative">
+                             <input type="checkbox" id="cartoonToggle" className="sr-only peer" checked={isCartoonSectionEnabled} onChange={() => onToggleCartoonSection(!isCartoonSectionEnabled)} />
+                             <div className="block bg-gray-600 w-14 h-8 rounded-full peer-checked:bg-admin-accent"></div>
+                             <div className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform peer-checked:translate-x-6"></div>
+                         </div>
+                     </label>
                  </div>
             </div>
         </div>
