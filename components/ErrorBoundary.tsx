@@ -1,3 +1,5 @@
+// FIX: Import global type definitions to resolve errors with JSX intrinsic elements and incorrect 'this.props' type resolution.
+import '../types';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 interface Props {
@@ -10,8 +12,11 @@ interface State {
 }
 
 class ErrorBoundary extends Component<Props, State> {
-  // Fix: Use a public class field to initialize state. This is a modern and safe way to set initial state in React class components.
-  public state: State = { hasError: false };
+  // FIX: Reverted to a standard constructor for state initialization to resolve `this.props` typing issues in some environments.
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   public static getDerivedStateFromError(_: Error): State {
     // Update state so the next render will show the fallback UI.

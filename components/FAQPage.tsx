@@ -1,3 +1,6 @@
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div', 'button', and 'span'.
+import '../types';
 import React, { useState } from 'react';
 
 interface FAQPageProps {

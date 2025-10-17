@@ -19,8 +19,11 @@ const app = express();
 const PORT = process.env.PORT || 8080; // Use port 8080 for Cloud Run compatibility
 
 // --- Initial Data for Seeding ---
-const { INITIAL_CATEGORIES } = require('./data/initial-data');
-const INITIAL_CONFIG = { siteName: 'Myflix' };
+// FIX: Use path.join to create a robust, absolute path to the data file.
+// This prevents "module not found" errors in different execution environments like Cloud Run.
+const { INITIAL_CATEGORIES } = require(path.join(__dirname, 'data', 'initial-data.js'));
+// FIX: Include all config fields for consistency during seeding.
+const INITIAL_CONFIG = { siteName: 'Myflix', isCartoonSectionEnabled: true };
 
 // --- Database Seeding Functions ---
 const seedDatabase = async () => {
@@ -45,10 +48,18 @@ const seedConfig = async () => {
         const doc = await configDoc.get();
         if (!doc.exists) {
             console.log('No site config found in Firestore. Seeding config...');
+            // FIX: Use the complete initial config object.
             await configDoc.set(INITIAL_CONFIG);
             console.log('Site config seeded successfully.');
         } else {
-            console.log('Site config found in Firestore. Skipping seed.');
+             // Ensure existing config has all necessary fields
+            const data = doc.data();
+            if (data.isCartoonSectionEnabled === undefined) {
+                console.log('Existing config is missing fields. Updating...');
+                await configDoc.set({ ...INITIAL_CONFIG, ...data });
+            } else {
+                console.log('Site config found in Firestore. Skipping seed.');
+            }
         }
     } catch (error) {
         console.error('Error seeding site config:', error);
@@ -67,9 +78,13 @@ app.get('/api/config', async (req, res) => {
     try {
         const doc = await configDoc.get();
         if (!doc.exists) {
-            return res.status(404).json({ error: 'Configuration not found.' });
+            // If config doesn't exist, create it with defaults and return it.
+            console.log('No config found on GET, creating with defaults.');
+            await configDoc.set(INITIAL_CONFIG);
+            return res.json(INITIAL_CONFIG);
         }
-        res.json(doc.data());
+        // FIX: Ensure the returned config has all expected fields, falling back to defaults.
+        res.json({ ...INITIAL_CONFIG, ...doc.data() });
     } catch (error) {
         console.error('Error fetching config:', error);
         res.status(500).json({ error: 'Failed to fetch config.' });
@@ -78,13 +93,14 @@ app.get('/api/config', async (req, res) => {
 
 // POST /api/config
 app.post('/api/config', async (req, res) => {
-    const { siteName } = req.body;
-    if (!siteName || typeof siteName !== 'string') {
-        return res.status(400).json({ error: 'Invalid data format. Expected a siteName string.' });
+    // FIX: Handle both siteName and isCartoonSectionEnabled from the request body.
+    const { siteName, isCartoonSectionEnabled } = req.body;
+    if (siteName === undefined || typeof siteName !== 'string' || isCartoonSectionEnabled === undefined) {
+        return res.status(400).json({ error: 'Invalid data format. Expected siteName and isCartoonSectionEnabled.' });
     }
 
     try {
-        await configDoc.set({ siteName });
+        await configDoc.set({ siteName, isCartoonSectionEnabled });
         console.log('POST /api/config - Site config updated successfully.');
         res.status(200).json({ message: 'Configuration updated successfully.' });
     } catch (error) {

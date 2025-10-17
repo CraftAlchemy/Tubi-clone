@@ -1,3 +1,6 @@
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div' and 'button'.
+import '../types';
 import React, { useRef } from 'react';
 import SeriesCard from './SeriesCard';
 import type { Series } from '../types';

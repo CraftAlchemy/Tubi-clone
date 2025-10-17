@@ -1,4 +1,7 @@
 
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div', 'form', and 'input'.
+import '../types';
 import React, { useState } from 'react';
 
 interface RegisterPageProps {

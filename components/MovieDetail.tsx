@@ -1,4 +1,7 @@
 
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div', 'img', and 'iframe'.
+import '../types';
 import React, { useEffect, useState } from 'react';
 import type { Movie, User } from '../types';
 

@@ -1,3 +1,6 @@
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div' and 'img'.
+import '../types';
 import React from 'react';
 import type { Series } from '../types';
 

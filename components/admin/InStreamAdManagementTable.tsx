@@ -1,3 +1,6 @@
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div' and 'p'.
+import '../../types';
 import React from 'react';
 import type { InStreamAd } from '../../types';
 

@@ -1,3 +1,6 @@
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div'.
+import '../types';
 import React from 'react';
 import SeriesCarousel from './SeriesCarousel';
 import CarouselSkeleton from './skeletons/CarouselSkeleton';

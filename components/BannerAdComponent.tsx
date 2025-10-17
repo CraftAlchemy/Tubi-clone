@@ -1,4 +1,7 @@
 
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div', 'a', and 'img'.
+import '../types';
 import React from 'react';
 import type { BannerAd } from '../types';
 

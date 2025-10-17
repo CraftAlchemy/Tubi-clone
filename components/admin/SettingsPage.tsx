@@ -1,5 +1,8 @@
 
 
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div', 'h1', and 'input'.
+import '../../types';
 import React, { useState, useEffect } from 'react';
 import type { TokenPack } from '../../types';
 

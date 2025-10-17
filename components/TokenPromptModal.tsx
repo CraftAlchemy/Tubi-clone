@@ -1,4 +1,7 @@
 
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div', 'h2', and 'p'.
+import '../types';
 import React from 'react';
 
 interface TokenPromptModalProps {

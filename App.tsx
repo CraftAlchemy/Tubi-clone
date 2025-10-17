@@ -1,5 +1,10 @@
 
 
+
+
+
+// FIX: Import global type definitions from './types' to resolve errors related to missing JSX intrinsic elements like 'div' and 'main'.
+import './types';
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';

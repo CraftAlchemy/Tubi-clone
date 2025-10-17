@@ -1,4 +1,7 @@
 
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div' and 'h1'.
+import '../../types';
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import StatCard from './StatCard';

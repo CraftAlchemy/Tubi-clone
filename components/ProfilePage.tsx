@@ -1,4 +1,7 @@
 
+
+// FIX: Import global type definitions to resolve errors related to missing JSX intrinsic elements like 'div', 'h1', and 'p'.
+import '../types';
 import React from 'react';
 import type { User, Category, Movie } from '../types';
 import MovieCard from './MovieCard';
