@@ -156,7 +156,13 @@ app.post('/api/content', async (req, res) => {
 // --- Static File Serving & Client-side Routing ---
 // This should come after API routes to ensure they are not overridden.
 // Serve static files from the root of the project directory.
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname), {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.ts') || filePath.endsWith('.tsx')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        }
+    }
+}));
 
 // For any other request, serve the index.html file so client-side routing can take over.
 app.get('*', (req, res) => {

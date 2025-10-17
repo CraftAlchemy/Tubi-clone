@@ -1,7 +1,7 @@
 // FIX: Replace the failing triple-slash directive with a side-effect import of 'react' 
 // to ensure React's global JSX types are loaded correctly. This is the root fix for all 
 // 'Property ... does not exist on type 'JSX.IntrinsicElements'' errors.
-import React from 'react';
+import 'react';
 
 // For ion-icon custom elements
 declare global {
