@@ -19,10 +19,15 @@ const app = express();
 const PORT = process.env.PORT || 8080; // Use port 8080 for Cloud Run compatibility
 
 // --- Initial Data for Seeding ---
-// FIX: Use path.join to create a robust, absolute path to the data file.
-// This prevents "module not found" errors in different execution environments like Cloud Run.
-const { INITIAL_CATEGORIES } = require(path.join(__dirname, 'data', 'initial-data.js'));
-// FIX: Include all config fields for consistency during seeding.
+// FIX: Wrap the require in a try-catch to prevent a server crash if the file is missing in the deployment environment.
+let INITIAL_CATEGORIES = [];
+try {
+    const data = require(path.join(__dirname, 'data', 'initial-data.js'));
+    INITIAL_CATEGORIES = data.INITIAL_CATEGORIES;
+    console.log('Successfully loaded initial data from file.');
+} catch (e) {
+    console.error('CRITICAL: Could not load initial-data.js. The server will start, but the database cannot be seeded with initial content. Error:', e.message);
+}
 const INITIAL_CONFIG = { siteName: 'Myflix', isCartoonSectionEnabled: true };
 
 // --- Database Seeding Functions ---
@@ -31,8 +36,12 @@ const seedDatabase = async () => {
         const doc = await categoriesDoc.get();
         if (!doc.exists) {
             console.log('No content data found in Firestore. Seeding database...');
-            await categoriesDoc.set({ data: INITIAL_CATEGORIES });
-            console.log('Database seeded successfully.');
+            if (INITIAL_CATEGORIES.length > 0) {
+                await categoriesDoc.set({ data: INITIAL_CATEGORIES });
+                console.log('Database seeded successfully.');
+            } else {
+                 console.warn('Initial data file was not loaded, skipping database seed.');
+            }
         } else {
             console.log('Content data found in Firestore. Skipping seed.');
         }
@@ -48,7 +57,6 @@ const seedConfig = async () => {
         const doc = await configDoc.get();
         if (!doc.exists) {
             console.log('No site config found in Firestore. Seeding config...');
-            // FIX: Use the complete initial config object.
             await configDoc.set(INITIAL_CONFIG);
             console.log('Site config seeded successfully.');
         } else {
@@ -83,7 +91,6 @@ app.get('/api/config', async (req, res) => {
             await configDoc.set(INITIAL_CONFIG);
             return res.json(INITIAL_CONFIG);
         }
-        // FIX: Ensure the returned config has all expected fields, falling back to defaults.
         res.json({ ...INITIAL_CONFIG, ...doc.data() });
     } catch (error) {
         console.error('Error fetching config:', error);
@@ -93,7 +100,6 @@ app.get('/api/config', async (req, res) => {
 
 // POST /api/config
 app.post('/api/config', async (req, res) => {
-    // FIX: Handle both siteName and isCartoonSectionEnabled from the request body.
     const { siteName, isCartoonSectionEnabled } = req.body;
     if (siteName === undefined || typeof siteName !== 'string' || isCartoonSectionEnabled === undefined) {
         return res.status(400).json({ error: 'Invalid data format. Expected siteName and isCartoonSectionEnabled.' });
