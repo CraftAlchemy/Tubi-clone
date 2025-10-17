@@ -37,7 +37,6 @@ const seedDatabase = async () => {
         console.error('Error seeding database:', error);
         // If seeding fails, the application might not work correctly.
         // It's important to ensure Firestore permissions are set up.
-        process.exit(1);
     }
 };
 
@@ -53,7 +52,6 @@ const seedConfig = async () => {
         }
     } catch (error) {
         console.error('Error seeding site config:', error);
-        process.exit(1);
     }
 };
 
