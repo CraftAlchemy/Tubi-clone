@@ -1,3 +1,8 @@
+// FIX: Add a triple-slash directive to explicitly include React's type definitions.
+// This ensures that the global JSX namespace is populated with standard HTML elements
+// before this file extends it with 'ion-icon'. This resolves all 'Property ... does not exist on type 'JSX.IntrinsicElements'' errors
+// and related type resolution issues across the application.
+/// <reference types="react" />
 
 // For ion-icon custom elements
 declare global {

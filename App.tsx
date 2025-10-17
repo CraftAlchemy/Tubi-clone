@@ -35,7 +35,7 @@ import { TOKEN_PACKS } from './data/tokenPacks';
 
 import type { User, Category, Movie, Episode, Series as SeriesType, SeriesCategory, LiveTVChannel, Advertisement, TokenPack } from './types';
 
-const API_BASE_URL = 'http://127.0.0.1:8080';
+const API_BASE_URL = '';
 
 const App: React.FC = () => {
     // State

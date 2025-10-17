@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Firestore } = require('@google-cloud/firestore');
+const path = require('path');
 
 // --- Firestore Initialization ---
 // The Firestore client will automatically use the credentials provided by
@@ -130,6 +131,22 @@ app.post('/api/content', async (req, res) => {
         res.status(500).json({ error: 'Failed to update content.' });
     }
 });
+
+
+// --- Static File Serving & Client-side Routing ---
+// This should come after API routes to ensure they are not overridden.
+// Serve static files from the root of the project directory.
+app.use(express.static(path.join(__dirname)));
+
+// For any other request, serve the index.html file so client-side routing can take over.
+app.get('*', (req, res) => {
+    // Ensure this doesn't accidentally catch API calls that fell through.
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).send('API endpoint not found.');
+    }
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 
 // --- Server Start ---
 app.listen(PORT, async () => {
